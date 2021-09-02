@@ -8,5 +8,5 @@ setup(
     author="Anthony Intili",
     packages=find_packages(),
     entry_points={"console_scripts": ["Unciv=Uncivilization.__main__:main"]},
-    install_requires=["pygame", "numpy", "pickle"],
+    install_requires=["pygame", "numpy"],
 )
