@@ -11,9 +11,10 @@ def updateInputs(game):
 
 
 def basicUserInputUpdateState(game):
+    r = game.Renderer
     inputs = game.PlayerInput
     gamestate = game.GameState
-    cam = game.Renderer.camera
+    cam = r.camera
     events = inputs.events
     for event in events:
         if event.type == pg.QUIT:
@@ -55,10 +56,11 @@ def basicUserInputUpdateState(game):
 
 
 def basicUserInputLogic(game):
+    rend = game.Renderer
     gs = game.GameState
     inputs = game.PlayerInput
     mc_pos = inputs.mc_pos
-    cam = game.Renderer.camera
+    cam = rend.camera
     size = cam.hex_size
 
     if mc_pos:
@@ -75,7 +77,10 @@ def basicUserInputLogic(game):
         diffy = y1 - y0
         diff = (-diffx, -diffy)
         cam.add_to_center(diff, game)
+        rend.full_redraw = True
 
     if inputs.scrolling:
         cam.zoom_recenter_method2(game)
         inputs.scrolling = False
+        rend.full_redraw = True
+

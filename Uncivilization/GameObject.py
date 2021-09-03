@@ -54,6 +54,7 @@ class Renderer:
         self.origin = (self.width // 2, self.height // 2)
         self.to_update = []
         self.camera = camera
+        self.full_redraw = True
 
     def draw(self, Sprite=None, coord=None, screen=None, color=None, bounds=None, surface=None):
         if screen != None:

@@ -1,5 +1,6 @@
 import pygame as pg
 import numpy as np
+import random
 
 from Uncivilization.Hex import *
 from Uncivilization.Camera import *
@@ -22,13 +23,14 @@ def draw_board(game):
     col0, row0 = axial_to_doubled(v0)
     col1, row1 = axial_to_doubled(v1)
     subtr = 0
-    for row in range(row0 - 1, row1 + 1):
-        for col in range(col0 - subtr - 2, col1 + 2, 2):
+    for row in range(row0 - 1, row1 + 2):
+        for col in range(col0 - subtr - 1, col1 + 3, 2):
             q, r = doubled_to_axial(row, col)
             tile = board.get(f"{q},{r}")
             if tile:
                 tile.draw_outline(game)
                 tile.draw_coords(game, ctype="doubled")
+                tile.draw_tile_images(game)
         subtr = 1 if subtr == 0 else 0
 
 
@@ -66,16 +68,36 @@ def diagnosticsDraw(game):
     pg.draw.line(display, (0, 0, 255), (w // 2, 0), (w // 2, h))
     pg.draw.line(display, (0, 0, 255), (0, h // 2), (w, h // 2))
 
+    pg.display.update()
+
 
 def cleanDiagnosticDraw(game):
     if game.cleanDiagnostic:
+        print("clean")
         display = game.Renderer.display
         display.fill(game.Renderer.defaultColor)
         draw_board(game)
         game.cleanDiagnostic = False
+        pg.display.update()
 
 
 def init_board(game):
+    colors = [
+        (255, 0, 0),
+        (0, 255, 0),
+        (0, 0, 255),
+        (255, 255, 0),
+        (0, 255, 255),
+        (255, 0, 255)
+    ]
+    imgs = [
+        "dark_green",
+        "blue",
+        "yellow",
+        "light_green",
+        "light_blue",
+        "white"
+    ]
     render = game.Renderer
     grid = game.GameState.grid_size
     origin = render.origin
@@ -89,27 +111,25 @@ def init_board(game):
     for row in range(-rows // 2, rows // 2 + 1):
         for col in range(-cols, cols + 1, 2):
             cube = doubled_to_cube(row, col)
-            color = (255, 0, 0) if abs(col) < 7 else (0, 255, 0)
-            tile = Hex(cube=cube, color=color)
+            #color = (255, 0, 0) if abs(col) < 7 else (0, 255, 0)
+            #color = random.choice(colors)
+            color = (255,0,0)
+            img = random.choice(imgs)
+            img = f"{img}_hex.png"
+            tile = Hex(cube=cube, color=color,images=[img])
             q, r = tile.v
             state.board.update({f"{q},{r}": tile})
 
 
 def draw(game):
-    state = game.GameState
-    render = game.Renderer
-    display = render.display
-    cam = render.camera
+    r = game.Renderer
+    display = r.display
 
-    # if cam.hex_size > cam.MAX_HEX_SIZE:
-    #     cam.reverse = not cam.reverse
-    # elif cam.hex_size < cam.MIN_HEX_SIZE:
-    #     cam.reverse = not cam.reverse
-    # sp = 0.1 if cam.reverse else -0.1
-    # cam.hex_size += sp
-
-    display.fill((0, 0, 0))
-    draw_board(game)
-
+    if r.full_redraw:
+        r.full_redraw = False
+        display.fill((0, 0, 0))
+        draw_board(game)
+        pg.display.update()
+    
     diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)
-    pg.display.flip() if len(render.to_update) == 0 else pg.display.update(render.to_update)
+

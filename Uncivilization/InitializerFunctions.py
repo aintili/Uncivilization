@@ -26,8 +26,8 @@ def start_game():
     width = 9 * infoObject.current_w // 10
     height = 9 * infoObject.current_h // 10
 
-    # width = 4*infoObject.current_w//10
-    # height = 4*infoObject.current_h//10
+    #width = 4*infoObject.current_w//10
+    #height = 4*infoObject.current_h//10
 
     # init screen
     display = pg.display.set_mode((width, height), pg.SRCALPHA)
@@ -41,6 +41,7 @@ def start_game():
     }
     print("Found assets:")
     pprint.pprint(assets)
+
 
     # set game icon
     pg.display.set_icon(assets["icon.png"])
