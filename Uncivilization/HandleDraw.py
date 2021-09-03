@@ -4,6 +4,7 @@ import numpy as np
 from Uncivilization.Hex import *
 from Uncivilization.Camera import *
 
+
 def draw_board(game):
     state = game.GameState
     board = state.board
@@ -14,20 +15,20 @@ def draw_board(game):
     w = r.width
     h = r.height
 
-    br,tl = cam.get_bottom_right_and_top_left()
-    v0 = pixel_to_axial(game,tl)
-    v1 = pixel_to_axial(game,br)
+    br, tl = cam.get_bottom_right_and_top_left()
+    v0 = pixel_to_axial(game, tl)
+    v1 = pixel_to_axial(game, br)
 
-    col0,row0 = axial_to_doubled(v0)
-    col1,row1 = axial_to_doubled(v1)
+    col0, row0 = axial_to_doubled(v0)
+    col1, row1 = axial_to_doubled(v1)
     subtr = 0
-    for row in range(row0-1,row1+1):
-        for col in range(col0-subtr-2,col1+2,2):
-            q,r = doubled_to_axial(row,col)
+    for row in range(row0 - 1, row1 + 1):
+        for col in range(col0 - subtr - 2, col1 + 2, 2):
+            q, r = doubled_to_axial(row, col)
             tile = board.get(f"{q},{r}")
             if tile:
                 tile.draw_outline(game)
-                tile.draw_coords(game,ctype="doubled")
+                tile.draw_coords(game, ctype="doubled")
         subtr = 1 if subtr == 0 else 0
 
 
@@ -50,7 +51,7 @@ def diagnosticsDraw(game):
     TextSurf = largeText.render(fps_string, False, (255, 255, 255))
     text_rect = TextSurf.get_rect(center=(12 * w // 17, 30))
 
-    pg.draw.rect(display,(0,0,0),text_rect_mock)
+    pg.draw.rect(display, (0, 0, 0), text_rect_mock)
     display.blit(TextSurf, text_rect)
 
     TextSurfMock = largeText.render(dt_mock, False, (255, 255, 255))
@@ -59,11 +60,12 @@ def diagnosticsDraw(game):
     TextSurf = largeText.render(dt_string, False, (255, 255, 255))
     text_rect = TextSurf.get_rect(center=(9 * w // 10, 30))
 
-    pg.draw.rect(display,(0,0,0),text_rect_mock)
+    pg.draw.rect(display, (0, 0, 0), text_rect_mock)
     display.blit(TextSurf, text_rect)
 
     pg.draw.line(display, (0, 0, 255), (w // 2, 0), (w // 2, h))
     pg.draw.line(display, (0, 0, 255), (0, h // 2), (w, h // 2))
+
 
 def cleanDiagnosticDraw(game):
     if game.cleanDiagnostic:
@@ -72,24 +74,26 @@ def cleanDiagnosticDraw(game):
         draw_board(game)
         game.cleanDiagnostic = False
 
+
 def init_board(game):
     render = game.Renderer
     grid = game.GameState.grid_size
     origin = render.origin
     display = render.display
-    rows,cols = grid
+    rows, cols = grid
     smallText = render.smallText
     state = game.GameState
 
     # up grid_height//2 and down grid_height // 2
     # same, left and right
-    for row in range(-rows//2,rows//2 + 1):
-        for col in range(-cols,cols + 1,2):
-            cube = doubled_to_cube(row,col)
-            color = (255,0,0) if abs(col) < 7 else (0,255,0)
-            tile = Hex(cube = cube,color = color)
-            q,r = tile.v
-            state.board.update({f"{q},{r}":tile})
+    for row in range(-rows // 2, rows // 2 + 1):
+        for col in range(-cols, cols + 1, 2):
+            cube = doubled_to_cube(row, col)
+            color = (255, 0, 0) if abs(col) < 7 else (0, 255, 0)
+            tile = Hex(cube=cube, color=color)
+            q, r = tile.v
+            state.board.update({f"{q},{r}": tile})
+
 
 def draw(game):
     state = game.GameState
@@ -104,8 +108,7 @@ def draw(game):
     # sp = 0.1 if cam.reverse else -0.1
     # cam.hex_size += sp
 
-
-    display.fill((0,0,0))
+    display.fill((0, 0, 0))
     draw_board(game)
 
     diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)

@@ -7,6 +7,7 @@ import random
 
 from Uncivilization.Camera import *
 
+
 class GameObject:
     def __init__(self, player_input, game_state, renderer):
         self.eps = 0.005
@@ -17,7 +18,6 @@ class GameObject:
         self.PlayerInput = player_input
         self.GameState = game_state
         self.Renderer = renderer
-
 
     def calc_fps(self):
         return 1 / self.dt
@@ -38,8 +38,9 @@ class PlayerInput:
 class GameState:
     def __init__(self):
         self.isPaused = False
-        self.grid_size = (25,50)
+        self.grid_size = (25, 50)
         self.board = {}
+
 
 class Renderer:
     def __init__(self, display, assets, camera):
@@ -50,7 +51,7 @@ class Renderer:
         self.display = display
         self.width = pg.display.get_surface().get_width()
         self.height = pg.display.get_surface().get_height()
-        self.origin = (self.width//2,self.height//2)
+        self.origin = (self.width // 2, self.height // 2)
         self.to_update = []
         self.camera = camera
 

@@ -50,13 +50,12 @@ def start_game():
     clock = pg.time.Clock()
 
     # initialize Game object
-    camera = Camera(width,height,(width//2,height//2))
+    camera = Camera(width, height, (width // 2, height // 2))
     Player_Input = PlayerInput()
-    Game_Renderer = Renderer(display, assets,camera)
+    Game_Renderer = Renderer(display, assets, camera)
     Game_State = GameState()
 
     GAME = GameObject(Player_Input, Game_State, Game_Renderer)
-
 
     init_board(GAME)
 

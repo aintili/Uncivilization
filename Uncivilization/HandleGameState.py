@@ -3,8 +3,9 @@ import numpy as np
 from Uncivilization.HandleInputs import *
 from Uncivilization.Hex import *
 
+
 def updatePositions(game):
-    pass    
+    pass
 
 
 def checkCollision(game):
@@ -14,7 +15,6 @@ def checkCollision(game):
 def handleCollisions(game):
     pass
 
-    
 
 def updateState(game):
     cam = game.Renderer.camera
@@ -26,4 +26,4 @@ def updateState(game):
         updatePositions(game)
         checkCollision(game)
         handleCollisions(game)
-    inputs.mc_pos = None    
+    inputs.mc_pos = None
