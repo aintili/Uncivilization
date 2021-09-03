@@ -33,15 +33,16 @@ def start_game():
     display = pg.display.set_mode((width, height), pg.SRCALPHA)
 
     # Load assets
-    print("Loading assets ")
+    t_a = time.time()
+    print("Loading assets...\n")
     IMAGES_DIR = pkg_resources.resource_filename("Uncivilization", "images/")
     assets = {
         img: pg.image.load(os.path.join(IMAGES_DIR, img)).convert_alpha()
         for img in os.listdir(IMAGES_DIR)
     }
-    print("Found assets:")
-    pprint.pprint(assets)
-
+    dt_a = 1000*(time.time()-t_a)
+    dt_a = format(dt_a,"16.2f")
+    print(f"Loaded assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
 
     # set game icon
     pg.display.set_icon(assets["icon.png"])
