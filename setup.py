@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="Uncivilization",
-    version="1.0.0",
+    version="0.1.0",
     description="A 4x game with a familiar feel",
     author="Anthony Intili",
     packages=find_packages(),
