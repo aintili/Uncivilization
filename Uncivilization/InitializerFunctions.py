@@ -75,3 +75,7 @@ def start_game():
         updateInputs(GAME)
         updateState(GAME)
         draw(GAME)
+
+
+def mainMenu():
+    pass
