@@ -26,8 +26,8 @@ def start_game():
     width = 9 * infoObject.current_w // 10
     height = 9 * infoObject.current_h // 10
 
-    #width = 4*infoObject.current_w//10
-    #height = 4*infoObject.current_h//10
+    # width = 4*infoObject.current_w//10
+    # height = 4*infoObject.current_h//10
 
     # init screen
     display = pg.display.set_mode((width, height), pg.SRCALPHA)
@@ -40,8 +40,8 @@ def start_game():
         img: pg.image.load(os.path.join(IMAGES_DIR, img)).convert_alpha()
         for img in os.listdir(IMAGES_DIR)
     }
-    dt_a = 1000*(time.time()-t_a)
-    dt_a = format(dt_a,"16.2f")
+    dt_a = 1000 * (time.time() - t_a)
+    dt_a = format(dt_a, "16.2f")
     print(f"Loaded assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
 
     # set game icon

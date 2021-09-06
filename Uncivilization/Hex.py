@@ -1,11 +1,11 @@
 import numpy as np
 import pygame as pg
 
-ONE_THIRD = 1/3
+ONE_THIRD = 1 / 3
 S3 = np.sqrt(3)
-INV_S3 = S3*ONE_THIRD
+INV_S3 = S3 * ONE_THIRD
 TO_PIXEL = np.array([[S3, 0.5 * S3], [0, 1.5]])
-TO_AXIAL = np.array([[0.57735027, -1*ONE_THIRD], [0.0, 2*ONE_THIRD]])
+TO_AXIAL = np.array([[0.57735027, -1 * ONE_THIRD], [0.0, 2 * ONE_THIRD]])
 
 
 def doubled_to_axial(row, col):
@@ -135,7 +135,7 @@ def screen_pixel_to_axial(game, pixel):
 
 
 class Hex:
-    def __init__(self, cube=None, q=None, r=None, color=(100, 100, 100),images = []):
+    def __init__(self, cube=None, q=None, r=None, color=(100, 100, 100), images=[]):
         if cube is None:
             assert q is not None and r is not None
             self.v = np.array([q, r])
@@ -154,9 +154,9 @@ class Hex:
         angle_rad = np.pi / 180 * angle_deg
         return (center[0] + size * np.cos(angle_rad), center[1] + size * np.sin(angle_rad))
 
-    def get_edge(self,center,size,indeces):
-        start,end = indeces
-        return get_corner(center,size,start),get_corner(center,size,end)
+    def get_edge(self, center, size, indeces):
+        start, end = indeces
+        return get_corner(center, size, start), get_corner(center, size, end)
 
     def draw_outline(self, game):
         render = game.Renderer
@@ -165,8 +165,8 @@ class Hex:
         cam = render.camera
         size = cam.hex_size
 
-        surf,center = self.get_image(game,img = "hex_outline.png")
-        display.blit(surf,center)
+        surf, center = self.get_image(game, img="hex_outline.png")
+        display.blit(surf, center)
         # color = self.color
 
         # x, y = axial_to_screen_pixel(game, self.v)
@@ -203,27 +203,26 @@ class Hex:
         TextSurf = render.smallText.render(coord_s, False, (255, 255, 255))
         text_rect = TextSurf.get_rect(center=(x, y))
         display.blit(TextSurf, text_rect)
-    
-    def get_image(self,game,img="blue_hex_and_border.png"):
+
+    def get_image(self, game, img="dark_blue_hex_and_border.png"):
         r = game.Renderer
         assets = r.assets
         size = r.camera.hex_size
 
         loaded_image = assets[img]
-        scale = (int(size*S3)+r.hex_buff,int(2*size)+r.hex_buff)
-        loaded_image = pg.transform.scale(loaded_image,scale)
-        img_w,img_h = loaded_image.get_size()
-        #border
-        
-        x0,y0 = axial_to_screen_pixel(game,self.v)
-        center = (x0-img_w/2,y0-img_h/2)
-        
-        return loaded_image,center
-    
-    def draw_tile_images(self,game):
+        scale = (int(size * S3) + r.hex_buff, int(2 * size) + r.hex_buff)
+        loaded_image = pg.transform.scale(loaded_image, scale)
+        img_w, img_h = loaded_image.get_size()
+        # border
+
+        x0, y0 = axial_to_screen_pixel(game, self.v)
+        center = (x0 - img_w / 2, y0 - img_h / 2)
+
+        return loaded_image, center
+
+    def draw_tile_images(self, game):
         display = game.Renderer.display
         for image in self.images:
-            img,center = self.get_image(game,img = image)
-            #img,center = self.get_image(game)
-            display.blit(img,center)
-
+            img, center = self.get_image(game, img=image)
+            # img,center = self.get_image(game)
+            display.blit(img, center)

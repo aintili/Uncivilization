@@ -86,4 +86,3 @@ def basicUserInputLogic(game):
         cam.zoom_recenter_method2(game)
         inputs.scrolling = False
         rend.full_redraw = True
-

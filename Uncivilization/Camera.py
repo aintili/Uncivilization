@@ -37,7 +37,7 @@ class Camera:
 
     def add_to_hex_size(self, incr, game):
         new_hex_size = self.hex_size + incr
-        self.update_hex_size(new_hex_size,game)
+        self.update_hex_size(new_hex_size, game)
 
     def update_center(self, cen, game):
         board = game.GameState.board
@@ -121,8 +121,8 @@ class Camera:
         # Update the hex_size however we want
         scroll_sp = 5
         scroll_amt = inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
-        self.add_to_hex_size(scroll_amt,game)
-        
+        self.add_to_hex_size(scroll_amt, game)
+
         # Now get the new center pixel for the same tile
         # and update the camera's position
         x_new, y_new = axial_to_pixel(game, old_v)
@@ -168,7 +168,7 @@ class Camera:
 
         scroll_sp = 10
         scroll_amt = inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
-        self.add_to_hex_size(scroll_amt,game)
+        self.add_to_hex_size(scroll_amt, game)
 
         x0_new, y0_new = axial_to_pixel(game, v)
 

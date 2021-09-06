@@ -29,8 +29,8 @@ def draw_board(game):
             tile = board.get(f"{q},{r}")
             if tile:
                 tile.draw_tile_images(game)
-                #tile.draw_outline(game)
-                #tile.draw_coords(game, ctype="doubled")
+                # tile.draw_outline(game)
+                # tile.draw_coords(game, ctype="doubled")
         subtr = 1 if subtr == 0 else 0
 
 
@@ -73,7 +73,7 @@ def diagnosticsDraw(game):
 
 def cleanDiagnosticDraw(game):
     if game.cleanDiagnostic:
-        #print("clean")
+        # print("clean")
         display = game.Renderer.display
         display.fill(game.Renderer.defaultColor)
         draw_board(game)
@@ -82,23 +82,8 @@ def cleanDiagnosticDraw(game):
 
 
 def init_board(game):
-    colors = [
-        (255, 0, 0),
-        (0, 255, 0),
-        (0, 0, 255),
-        (255, 255, 0),
-        (0, 255, 255),
-        (255, 0, 255)
-    ]
-    imgs = [
-        "dark_green",
-        "dark_blue",
-        "yellow",
-        "light_green",
-        "light_blue",
-        "white",
-        "red"
-    ]
+    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 255)]
+    imgs = ["dark_green", "dark_blue", "yellow", "light_green", "light_blue", "white", "red"]
     render = game.Renderer
     grid = game.GameState.grid_size
     origin = render.origin
@@ -112,12 +97,13 @@ def init_board(game):
     for row in range(-rows // 2, rows // 2 + 1):
         for col in range(-cols, cols + 1, 2):
             cube = doubled_to_cube(row, col)
-            color = (50,50,50)
+            color = (50, 50, 50)
             img = random.choice(imgs)
             img = f"{img}_hex_and_border.png"
-            tile = Hex(cube=cube, color=color,images=[img])
+            tile = Hex(cube=cube, color=color, images=[img])
             q, r = tile.v
             state.board.update({f"{q},{r}": tile})
+
 
 def draw(game):
     r = game.Renderer
@@ -128,6 +114,5 @@ def draw(game):
         display.fill((0, 0, 0))
         draw_board(game)
         pg.display.update()
-    
-    diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)
 
+    diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)
