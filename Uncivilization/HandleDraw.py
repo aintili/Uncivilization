@@ -28,9 +28,9 @@ def draw_board(game):
             q, r = doubled_to_axial(row, col)
             tile = board.get(f"{q},{r}")
             if tile:
-                tile.draw_outline(game)
-                tile.draw_coords(game, ctype="doubled")
                 tile.draw_tile_images(game)
+                #tile.draw_outline(game)
+                #tile.draw_coords(game, ctype="doubled")
         subtr = 1 if subtr == 0 else 0
 
 
@@ -73,7 +73,7 @@ def diagnosticsDraw(game):
 
 def cleanDiagnosticDraw(game):
     if game.cleanDiagnostic:
-        print("clean")
+        #print("clean")
         display = game.Renderer.display
         display.fill(game.Renderer.defaultColor)
         draw_board(game)
@@ -92,11 +92,12 @@ def init_board(game):
     ]
     imgs = [
         "dark_green",
-        "blue",
+        "dark_blue",
         "yellow",
         "light_green",
         "light_blue",
-        "white"
+        "white",
+        "red"
     ]
     render = game.Renderer
     grid = game.GameState.grid_size
@@ -111,15 +112,12 @@ def init_board(game):
     for row in range(-rows // 2, rows // 2 + 1):
         for col in range(-cols, cols + 1, 2):
             cube = doubled_to_cube(row, col)
-            #color = (255, 0, 0) if abs(col) < 7 else (0, 255, 0)
-            #color = random.choice(colors)
-            color = (255,0,0)
+            color = (50,50,50)
             img = random.choice(imgs)
-            img = f"{img}_hex.png"
+            img = f"{img}_hex_and_border.png"
             tile = Hex(cube=cube, color=color,images=[img])
             q, r = tile.v
             state.board.update({f"{q},{r}": tile})
-
 
 def draw(game):
     r = game.Renderer

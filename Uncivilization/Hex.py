@@ -147,6 +147,7 @@ class Hex:
             self.cube = cube
         self.color = color
         self.images = images
+        self.boarder_img = "outline_hex.png"
 
     def get_corner(self, center, size, index):
         angle_deg = 60 * index - 30
@@ -164,13 +165,18 @@ class Hex:
         cam = render.camera
         size = cam.hex_size
 
-        x, y = axial_to_screen_pixel(game, self.v)
+        surf,center = self.get_image(game,img = "hex_outline.png")
+        display.blit(surf,center)
+        # color = self.color
 
-        points = []
-        for i in range(6):
-            points.append(self.get_corner((x, y), size, i))
-        # pg.draw.rect(display,(100,100,100), (x+5,y+5,10,10))
-        pg.draw.polygon(display, self.color, points, width=3)
+        # x, y = axial_to_screen_pixel(game, self.v)
+
+        # points = []
+        # for i in range(6):
+        #     points.append(self.get_corner((x, y), size, i))
+
+        # width = int(0.1*(size)) + 1
+        # pg.draw.polygon(display, color, points, width=width)
 
     def draw_coords(self, game, ctype="axial"):
         q, r = self.v
@@ -198,15 +204,16 @@ class Hex:
         text_rect = TextSurf.get_rect(center=(x, y))
         display.blit(TextSurf, text_rect)
     
-    def get_image(self,game,img="blue_hex.png"):
+    def get_image(self,game,img="blue_hex_and_border.png"):
         r = game.Renderer
         assets = r.assets
         size = r.camera.hex_size
 
         loaded_image = assets[img]
-        scale = (int(size*S3),int(2*size))
+        scale = (int(size*S3)+r.hex_buff,int(2*size)+r.hex_buff)
         loaded_image = pg.transform.scale(loaded_image,scale)
         img_w,img_h = loaded_image.get_size()
+        #border
         
         x0,y0 = axial_to_screen_pixel(game,self.v)
         center = (x0-img_w/2,y0-img_h/2)
@@ -214,8 +221,9 @@ class Hex:
         return loaded_image,center
     
     def draw_tile_images(self,game):
+        display = game.Renderer.display
         for image in self.images:
             img,center = self.get_image(game,img = image)
-            display = game.Renderer.display
+            #img,center = self.get_image(game)
             display.blit(img,center)
 

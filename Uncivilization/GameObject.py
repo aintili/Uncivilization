@@ -55,6 +55,7 @@ class Renderer:
         self.to_update = []
         self.camera = camera
         self.full_redraw = True
+        self.hex_buff = 5
 
     def draw(self, Sprite=None, coord=None, screen=None, color=None, bounds=None, surface=None):
         if screen != None:

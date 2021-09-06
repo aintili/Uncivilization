@@ -42,7 +42,7 @@ def basicUserInputUpdateState(game):
                 m_pos = pg.mouse.get_pos()
                 inputs.mc_pos = m_pos
 
-        if event.type == pg.MOUSEWHEEL:
+        elif event.type == pg.MOUSEWHEEL:
             if inputs.scrolling is False:
                 inputs.scroll_dir = event.y
                 inputs.scrolling = True
@@ -63,11 +63,11 @@ def basicUserInputLogic(game):
     cam = rend.camera
     size = cam.hex_size
 
-    if mc_pos:
-        v = screen_pixel_to_axial(game, mc_pos)
-        col, row = axial_to_doubled(v)
-        q, r = v
-        print(f"{q},{r} | {col},{row}\n")
+    # if mc_pos:
+    #     v = screen_pixel_to_axial(game, mc_pos)
+    #     col, row = axial_to_doubled(v)
+    #     q, r = v
+    #     print(f"{q},{r} | {col},{row}\n")
 
     if inputs.lc_held1 is not None and inputs.lc_held0 is not None:
         x0, y0 = inputs.lc_held0
@@ -77,7 +77,10 @@ def basicUserInputLogic(game):
         diffy = y1 - y0
         diff = (-diffx, -diffy)
         cam.add_to_center(diff, game)
+
         rend.full_redraw = True
+        if inputs.lc_held1 == inputs.lc_held0:
+            rend.full_redraw = False
 
     if inputs.scrolling:
         cam.zoom_recenter_method2(game)

@@ -149,8 +149,11 @@ class Camera:
         # Where Y is y_camera - y_hex_origin
         # To correctly place the camera after zoom we assert
         # the ratio D1/(D1+D2) is unchanged. That is, Y_new = (size_new/size_old)*Y_old
-        # Through a little more geometry and law of sines one can prove
-        # X_new = R*( (size_new/2) - (Y_new/sqrt(3)) )/(R-1)
+        # Since all right triangles are similar, the ratio X/Y must also be preserved,
+        # thus:
+        # X_new = (size_new/size_old)*X_old
+        # Since this is done entirely through ratios, this works
+        # independently of which sub equilateral triangle we are in
 
         v = pixel_to_axial(game, self.center)
 
