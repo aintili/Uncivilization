@@ -9,6 +9,7 @@ from Uncivilization.GameObject import *
 from Uncivilization.HandleInputs import *
 from Uncivilization.HandleGameState import *
 from Uncivilization.HandleDraw import *
+from Uncivilization.IntroAnimation import *
 
 S3 = np.sqrt(3)
 
@@ -40,6 +41,7 @@ def mainMenu():
     # initialize pygame
     pg.init()
     pg.font.init()
+    pg.mixer.init()
 
     # get screen info, ie the monitor info
     infoObject = pg.display.Info()
@@ -82,12 +84,28 @@ def mainMenu():
     }
     Game_Renderer.assets = assets
     dt_a = 1000 * (time.time() - t_a)
-    dt_a = format(dt_a, "16.2f")
-    print(f"Configured assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
+    dt_a = format(dt_a, "0.2f")
+    #print(f"Configured assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
+    print(f"Configured {len(assets.keys())} assets in {dt_a} ms\n")
+
+
+    # Load sounds
+    t_s = time.time()
+    print("Processing assets...\n")
+    SOUNDS_DIR = pkg_resources.resource_filename("Uncivilization", "sounds/")
+    sounds = {
+        sound: pg.mixer.Sound(os.path.join(SOUNDS_DIR, sound)) for sound in os.listdir(SOUNDS_DIR)
+    }
+    dt_s = 1000 * (time.time() - t_s)
+    dt_s = format(dt_s, "0.2f")
+    #print(f"Configured assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
+    print(f"Configured {sounds} wavs in {dt_s} ms\n")
+
 
     # set game icon
     pg.display.set_icon(assets["icon.png"])
 
+    play_animation(GAME,clock,time.time(),sounds)
     while Game_State.inMenu:
         # Frame rate no higher than FPS
         clock.tick(MAX_FPS)

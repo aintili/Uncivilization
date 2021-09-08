@@ -63,7 +63,7 @@ class Renderer:
         self.assets = {}
 
     def getMainMenuBoxes(
-        self, text_color=(255, 255, 255), background_color_1=(0, 0, 0), background_color_2=(0, 0, 0)
+        self, text_color=(255, 255, 255), background_color_1=(0, 0, 0), background_color_2=(0, 0, 0),center_1 = None
     ):
         title_string_1 = "UN"
         title_string_2 = "Civilzation"
@@ -80,9 +80,10 @@ class Renderer:
         sa, _ = TextSurfA.get_size()
         sb, _ = TextSurfB.get_size()
         centerax = (w - sb) / 2
+        centeray = h//2 if (center_1 is None or center_1 > h//2) else center_1
         centerbx = (w + sa) / 2
 
-        text_rectA = TextSurfA.get_rect(center=(centerax, h // 2))
+        text_rectA = TextSurfA.get_rect(center=(centerax, centeray))
         text_rectB = TextSurfB.get_rect(center=(centerbx, h // 2))
 
         TextSurf1 = largeText.render(game_string, True, text_color, background_color_1)
@@ -98,7 +99,7 @@ class Renderer:
             [TextSurf2, text_rect2],
         ]
 
-    def updateMainMenuBoxes(self, background_color_1=(0, 0, 0), background_color_2=(0, 0, 0)):
+    def updateMainMenuBoxes(self, background_color_1=(0, 0, 0), background_color_2=(0, 0, 0),center_1 = None):
         self.mainMenuBoxes = self.getMainMenuBoxes(
-            background_color_1=background_color_1, background_color_2=background_color_2
+            background_color_1=background_color_1, background_color_2=background_color_2, center_1 = center_1
         )
