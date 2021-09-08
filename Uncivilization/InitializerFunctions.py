@@ -10,8 +10,30 @@ from Uncivilization.HandleInputs import *
 from Uncivilization.HandleGameState import *
 from Uncivilization.HandleDraw import *
 
+S3 = np.sqrt(3)
 
-def start_game():
+
+def start_game(GAME, clock, MAX_FPS):
+    t0 = time.time()
+    init_board(GAME)
+    s = True
+    while s:
+        # Frame rate no higher than FPS
+        clock.tick(MAX_FPS)
+
+        # Framerate independence, use dt
+        t1 = time.time()
+        dt = t1 - t0
+        t0 = t1
+        GAME.dt = dt
+
+        # standard game loop, poll inputs, process and update game state, render
+        updateInputs(GAME)
+        updateState(GAME)
+        draw(GAME)
+
+
+def mainMenu():
     # t0
     t0 = time.time()
 
@@ -32,21 +54,6 @@ def start_game():
     # init screen
     display = pg.display.set_mode((width, height), pg.SRCALPHA)
 
-    # Load assets
-    t_a = time.time()
-    print("Loading assets...\n")
-    IMAGES_DIR = pkg_resources.resource_filename("Uncivilization", "images/")
-    assets = {
-        img: pg.image.load(os.path.join(IMAGES_DIR, img)).convert_alpha()
-        for img in os.listdir(IMAGES_DIR)
-    }
-    dt_a = 1000 * (time.time() - t_a)
-    dt_a = format(dt_a, "16.2f")
-    print(f"Loaded assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
-
-    # set game icon
-    pg.display.set_icon(assets["icon.png"])
-
     # set default FPS and make timer to maintain it
     MAX_FPS = 60
     clock = pg.time.Clock()
@@ -54,15 +61,34 @@ def start_game():
     # initialize Game object
     camera = Camera(width, height, (width // 2, height // 2))
     Player_Input = PlayerInput()
-    Game_Renderer = Renderer(display, assets, camera)
+    Game_Renderer = Renderer(display, camera)
     Game_State = GameState()
-
     GAME = GameObject(Player_Input, Game_State, Game_Renderer)
 
-    init_board(GAME)
+    # Load assets
+    t_a = time.time()
+    print("Processing assets...\n")
+    IMAGES_DIR = pkg_resources.resource_filename("Uncivilization", "images/")
+    mid_size = camera.hex_size
+    mid_scale = (
+        int(mid_size * S3) + Game_Renderer.hex_buff,
+        int(2 * mid_size) + Game_Renderer.hex_buff,
+    )
+    assets = {
+        img: pg.transform.scale(
+            pg.image.load(os.path.join(IMAGES_DIR, img)).convert_alpha(), mid_scale
+        )
+        for img in os.listdir(IMAGES_DIR)
+    }
+    Game_Renderer.assets = assets
+    dt_a = 1000 * (time.time() - t_a)
+    dt_a = format(dt_a, "16.2f")
+    print(f"Configured assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
 
-    s = True
-    while s:
+    # set game icon
+    pg.display.set_icon(assets["icon.png"])
+
+    while Game_State.inMenu:
         # Frame rate no higher than FPS
         clock.tick(MAX_FPS)
 
@@ -74,9 +100,7 @@ def start_game():
 
         # standard game loop, poll inputs, process and update game state, render
         updateInputs(GAME)
-        updateState(GAME)
-        draw(GAME)
+        updateStateMenu(GAME)
+        drawMenu(GAME)
 
-
-def mainMenu():
-    pass
+    start_game(GAME, clock, MAX_FPS)

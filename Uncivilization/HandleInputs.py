@@ -4,10 +4,29 @@ import numpy as np
 from Uncivilization.Hex import *
 
 
+def basicUserInputUpdateStateMenu(game):
+    r = game.Renderer
+    inputs = game.PlayerInput
+    gamestate = game.GameState
+    events = inputs.events
+    for event in events:
+        if event.type == pg.QUIT:
+            quit()
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                m_pos = pg.mouse.get_pos()
+                inputs.mc_pos = m_pos
+            if event.button == 3:
+                if game.drawDiagnostic:
+                    game.cleanDiagnostic = True
+                game.drawDiagnostic = not game.drawDiagnostic
+
+
 def updateInputs(game):
     inputs = game.PlayerInput
     inputs.events = pg.event.get()
     inputs.keyboard_dictionary = pg.key.get_pressed()
+    inputs.m_pos = pg.mouse.get_pos()
 
 
 def basicUserInputUpdateState(game):
@@ -86,3 +105,28 @@ def basicUserInputLogic(game):
         cam.zoom_recenter_method2(game)
         inputs.scrolling = False
         rend.full_redraw = True
+
+
+def basicUserInputLogicMenu(game):
+    rend = game.Renderer
+    gs = game.GameState
+    inputs = game.PlayerInput
+    mc_pos = inputs.mc_pos
+    m_pos = inputs.m_pos
+    _, _, play_game_info, settings_info = rend.mainMenuBoxes
+    _, rect_play = play_game_info
+    _, rect_settings = settings_info
+
+    if mc_pos is not None:
+        if rect_play.collidepoint(mc_pos):
+            gs.inMenu = False
+
+    if m_pos is not None:
+        if rect_play.collidepoint(m_pos):
+            rend.updateMainMenuBoxes(background_color_1=(50, 50, 50))
+        elif rect_settings.collidepoint(m_pos):
+            rend.updateMainMenuBoxes(background_color_2=(50, 50, 50))
+        else:
+            rend.updateMainMenuBoxes()
+    else:
+        rend.updateMainMenuBoxes()

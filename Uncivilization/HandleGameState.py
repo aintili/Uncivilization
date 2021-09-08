@@ -27,3 +27,12 @@ def updateState(game):
         checkCollision(game)
         handleCollisions(game)
     inputs.mc_pos = None
+
+
+def updateStateMenu(game):
+    cam = game.Renderer.camera
+    gamestate = game.GameState
+    inputs = game.PlayerInput
+    basicUserInputUpdateStateMenu(game)
+    basicUserInputLogicMenu(game)
+    inputs.mc_pos = None

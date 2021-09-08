@@ -164,19 +164,16 @@ class Hex:
         display = render.display
         cam = render.camera
         size = cam.hex_size
+        color = self.color
 
-        surf, center = self.get_image(game, img="hex_outline.png")
-        display.blit(surf, center)
-        # color = self.color
+        x, y = axial_to_screen_pixel(game, self.v)
 
-        # x, y = axial_to_screen_pixel(game, self.v)
+        points = []
+        for i in range(6):
+            points.append(self.get_corner((x, y), size, i))
 
-        # points = []
-        # for i in range(6):
-        #     points.append(self.get_corner((x, y), size, i))
-
-        # width = int(0.1*(size)) + 1
-        # pg.draw.polygon(display, color, points, width=width)
+        width = int(0.1 * (size)) + 1
+        pg.draw.polygon(display, color, points, width=width)
 
     def draw_coords(self, game, ctype="axial"):
         q, r = self.v
@@ -200,7 +197,7 @@ class Hex:
             col, row = axial_to_doubled([q, r])
             coord_s += f"{col} , {row}"
 
-        TextSurf = render.smallText.render(coord_s, False, (255, 255, 255))
+        TextSurf = render.smallText.render(coord_s, False, (0, 0, 0))
         text_rect = TextSurf.get_rect(center=(x, y))
         display.blit(TextSurf, text_rect)
 
@@ -224,5 +221,4 @@ class Hex:
         display = game.Renderer.display
         for image in self.images:
             img, center = self.get_image(game, img=image)
-            # img,center = self.get_image(game)
             display.blit(img, center)

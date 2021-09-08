@@ -2,11 +2,11 @@ import pygame as pg
 from Uncivilization.Hex import *
 
 S3 = 3 ** (1 / 2)
-INV_S3 = S3 * 0.3333333333333333
+INV_S3 = S3 * (1 / 3)
 
 
 class Camera:
-    def __init__(self, w, h, center, n_min=6, n_max=14):
+    def __init__(self, w, h, center, n_max = 14, n_min = 5):
         self.MIN_HEX_SIZE = w / (n_max * S3)
         self.MAX_HEX_SIZE = w / (n_min * S3)
         self.w = w
@@ -149,7 +149,8 @@ class Camera:
         # Where Y is y_camera - y_hex_origin
         # To correctly place the camera after zoom we assert
         # the ratio D1/(D1+D2) is unchanged. That is, Y_new = (size_new/size_old)*Y_old
-        # Since all right triangles are similar, the ratio X/Y must also be preserved,
+        # Since the new right triangle is a shear transformation of the old right triangle,
+        # they are similar, so the ratio X/Y must also be preserved,
         # thus:
         # X_new = (size_new/size_old)*X_old
         # Since this is done entirely through ratios, this works

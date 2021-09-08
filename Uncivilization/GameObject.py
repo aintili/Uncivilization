@@ -30,9 +30,11 @@ class PlayerInput:
         self.prevEvents = None
         self.scroll_dir = 0
         self.mc_pos = None
+        self.m_pos = None
         self.lc_held0 = None
         self.lc_held1 = None
         self.scrolling = False
+        self.custom_inputs = {}
 
 
 class GameState:
@@ -40,14 +42,15 @@ class GameState:
         self.isPaused = False
         self.grid_size = (25, 50)
         self.board = {}
+        self.inMenu = True
 
 
 class Renderer:
-    def __init__(self, display, assets, camera):
-        self.assets = assets
+    def __init__(self, display, camera):
         self.defaultColor = (0, 0, 0)
+        self.extraLargeText = pg.font.SysFont("ubuntucondensed", 60)
         self.largeText = pg.font.SysFont("ubuntucondensed", 30)
-        self.smallText = pg.font.SysFont("ubuntucondensed", 15)
+        self.smallText = pg.font.SysFont("ubuntucondensed", 20)
         self.display = display
         self.width = pg.display.get_surface().get_width()
         self.height = pg.display.get_surface().get_height()
@@ -56,12 +59,46 @@ class Renderer:
         self.camera = camera
         self.full_redraw = True
         self.hex_buff = 5
+        self.mainMenuBoxes = self.getMainMenuBoxes()
+        self.assets = {}
 
-    def draw(self, Sprite=None, coord=None, screen=None, color=None, bounds=None, surface=None):
-        if screen != None:
-            if Sprite is not None and coord != (None, None):
-                screen.blit(Sprite, coord)
-            elif color is not None and bounds is not None:
-                pg.draw.rect(screen, color, bounds)
-            elif surface is not None and bounds is not None:
-                screen.blit(surface, bounds)
+    def getMainMenuBoxes(
+        self, text_color=(255, 255, 255), background_color_1=(0, 0, 0), background_color_2=(0, 0, 0)
+    ):
+        title_string_1 = "UN"
+        title_string_2 = "Civilzation"
+        game_string = "Play Game"
+        settings = "Settings"
+        w = self.width
+        h = self.height
+        largeText = self.largeText
+        extraLargeText = self.extraLargeText
+
+        TextSurfA = extraLargeText.render(title_string_1, True, (255, 0, 0), (0, 0, 0))
+        TextSurfB = extraLargeText.render(title_string_2, True, text_color, (0, 0, 0))
+
+        sa, _ = TextSurfA.get_size()
+        sb, _ = TextSurfB.get_size()
+        centerax = (w - sb) / 2
+        centerbx = (w + sa) / 2
+
+        text_rectA = TextSurfA.get_rect(center=(centerax, h // 2))
+        text_rectB = TextSurfB.get_rect(center=(centerbx, h // 2))
+
+        TextSurf1 = largeText.render(game_string, True, text_color, background_color_1)
+        text_rect1 = TextSurf1.get_rect(center=(w // 2 - w // 10, h // 2 + h // 10))
+
+        TextSurf2 = largeText.render(settings, True, text_color, background_color_2)
+        text_rect2 = TextSurf2.get_rect(center=(w // 2 + w // 10, h // 2 + h // 10))
+
+        return [
+            [TextSurfA, text_rectA],
+            [TextSurfB, text_rectB],
+            [TextSurf1, text_rect1],
+            [TextSurf2, text_rect2],
+        ]
+
+    def updateMainMenuBoxes(self, background_color_1=(0, 0, 0), background_color_2=(0, 0, 0)):
+        self.mainMenuBoxes = self.getMainMenuBoxes(
+            background_color_1=background_color_1, background_color_2=background_color_2
+        )
