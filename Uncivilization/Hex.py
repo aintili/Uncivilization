@@ -135,7 +135,7 @@ def screen_pixel_to_axial(game, pixel):
 
 
 class Hex:
-    def __init__(self, cube=None, q=None, r=None, color=(100, 100, 100), images=[]):
+    def __init__(self, cube=None, q=None, r=None, images=[]):
         if cube is None:
             assert q is not None and r is not None
             self.v = np.array([q, r])
@@ -145,7 +145,6 @@ class Hex:
             assert cube is not None
             self.v = np.array(cube_to_axial(cube))
             self.cube = cube
-        self.color = color
         self.images = images
         self.boarder_img = "outline_hex.png"
 
@@ -157,23 +156,6 @@ class Hex:
     def get_edge(self, center, size, indeces):
         start, end = indeces
         return get_corner(center, size, start), get_corner(center, size, end)
-
-    def draw_outline(self, game):
-        render = game.Renderer
-        origin = render.origin
-        display = render.display
-        cam = render.camera
-        size = cam.hex_size
-        color = self.color
-
-        x, y = axial_to_screen_pixel(game, self.v)
-
-        points = []
-        for i in range(6):
-            points.append(self.get_corner((x, y), size, i))
-
-        width = int(0.1 * (size)) + 1
-        pg.draw.polygon(display, color, points, width=width)
 
     def draw_coords(self, game, ctype="axial"):
         q, r = self.v

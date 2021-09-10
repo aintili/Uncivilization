@@ -1,6 +1,5 @@
 import numpy as np
 import os
-import pkg_resources
 import pygame as pg
 import pprint
 import time
@@ -10,8 +9,14 @@ from Uncivilization.HandleInputs import *
 from Uncivilization.HandleGameState import *
 from Uncivilization.HandleDraw import *
 from Uncivilization.IntroAnimation import *
+from Uncivilization.MapNameToInstructions import *
 
 S3 = np.sqrt(3)
+
+
+def init_board(game):
+    f = MAP_TO_FUNC[game.GameState.map_type]
+    f(game)
 
 
 def start_game(GAME, clock, MAX_FPS):
@@ -34,14 +39,13 @@ def start_game(GAME, clock, MAX_FPS):
         draw(GAME)
 
 
-def mainMenu():
+def mainMenu(raw_assets, sounds, player_config):
     # t0
     t0 = time.time()
 
     # initialize pygame
     pg.init()
     pg.font.init()
-    pg.mixer.init()
 
     # get screen info, ie the monitor info
     infoObject = pg.display.Info()
@@ -63,62 +67,35 @@ def mainMenu():
     # initialize Game object
     camera = Camera(width, height, (width // 2, height // 2))
     Player_Input = PlayerInput()
-    Game_Renderer = Renderer(display, camera)
+    Game_Renderer = Renderer(display, camera, raw_assets)
     Game_State = GameState()
     GAME = GameObject(Player_Input, Game_State, Game_Renderer)
 
-    # Load assets
-    t_a = time.time()
-    print("Processing assets...\n")
-    IMAGES_DIR = pkg_resources.resource_filename("Uncivilization", "images/")
-    mid_size = camera.hex_size
-    mid_scale = (
-        int(mid_size * S3) + Game_Renderer.hex_buff,
-        int(2 * mid_size) + Game_Renderer.hex_buff,
-    )
-    assets = {
-        img: pg.transform.scale(
-            pg.image.load(os.path.join(IMAGES_DIR, img)).convert_alpha(), mid_scale
-        )
-        for img in os.listdir(IMAGES_DIR)
-    }
-    Game_Renderer.assets = assets
-    dt_a = 1000 * (time.time() - t_a)
-    dt_a = format(dt_a, "0.2f")
-    #print(f"Configured assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
-    print(f"Configured {len(assets.keys())} assets in {dt_a} ms\n")
-
-
-    # Load sounds
-    t_s = time.time()
-    print("Processing assets...\n")
-    SOUNDS_DIR = pkg_resources.resource_filename("Uncivilization", "sounds/")
-    sounds = {
-        sound: pg.mixer.Sound(os.path.join(SOUNDS_DIR, sound)) for sound in os.listdir(SOUNDS_DIR)
-    }
-    dt_s = 1000 * (time.time() - t_s)
-    dt_s = format(dt_s, "0.2f")
-    #print(f"Configured assets:\n{pprint.pformat(assets, indent=2)}\n in: {dt_a} ms\n")
-    print(f"Configured {sounds} wavs in {dt_s} ms\n")
-
-
     # set game icon
-    pg.display.set_icon(assets["icon.png"])
+    pg.display.set_icon(raw_assets["icon.png"])
 
-    play_animation(GAME,clock,time.time(),sounds)
-    while Game_State.inMenu:
-        # Frame rate no higher than FPS
+    skip_animation = False
+    play_animation(GAME, clock, time.time(), sounds, skip_animation)
+    while Game_State.start_game is False:
         clock.tick(MAX_FPS)
-
-        # Framerate independence, use dt
         t1 = time.time()
         dt = t1 - t0
         t0 = t1
         GAME.dt = dt
-
-        # standard game loop, poll inputs, process and update game state, render
         updateInputs(GAME)
-        updateStateMenu(GAME)
-        drawMenu(GAME)
+        if Game_State.inMenu:
+            # standard game loop, poll inputs, process and update game state, render
+            updateStateMenu(GAME)
+            drawMenu(GAME)
+
+        elif Game_State.inMapSelect:
+            updateStateMapSelect(GAME)
+            # drawMapSelect(GAME)
+
+    print("Waiting ~3s to simulate play game -> map select -> loading map")
+    time.sleep(3)
+
+    for key in sounds.keys():
+        sounds[key].stop()
 
     start_game(GAME, clock, MAX_FPS)

@@ -119,7 +119,9 @@ def basicUserInputLogicMenu(game):
 
     if mc_pos is not None:
         if rect_play.collidepoint(mc_pos):
+            # We have hit play_game
             gs.inMenu = False
+            gs.inMapSelect = True
 
     if m_pos is not None:
         if rect_play.collidepoint(m_pos):

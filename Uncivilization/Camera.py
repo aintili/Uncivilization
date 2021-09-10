@@ -6,7 +6,7 @@ INV_S3 = S3 * (1 / 3)
 
 
 class Camera:
-    def __init__(self, w, h, center, n_max = 14, n_min = 5):
+    def __init__(self, w, h, center, n_max=14, n_min=5):
         self.MIN_HEX_SIZE = w / (n_max * S3)
         self.MAX_HEX_SIZE = w / (n_min * S3)
         self.w = w

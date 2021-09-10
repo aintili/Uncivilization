@@ -82,30 +82,6 @@ def cleanDiagnosticDraw(game):
         pg.display.update()
 
 
-def init_board(game):
-    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 255)]
-    imgs = ["dark_green", "dark_blue", "yellow", "light_green", "light_blue", "white", "red"]
-    render = game.Renderer
-    grid = game.GameState.grid_size
-    origin = render.origin
-    display = render.display
-    rows, cols = grid
-    smallText = render.smallText
-    state = game.GameState
-
-    # up grid_height//2 and down grid_height // 2
-    # same, left and right
-    for row in range(-rows // 2, rows // 2 + 1):
-        for col in range(-cols, cols + 1, 2):
-            cube = doubled_to_cube(row, col)
-            color = (50, 50, 50)
-            img = random.choice(imgs)
-            img = f"{img}_hex_and_border.png"
-            tile = Hex(cube=cube, color=color, images=[img])
-            q, r = tile.v
-            state.board.update({f"{q},{r}": tile})
-
-
 def draw(game):
     r = game.Renderer
     display = r.display

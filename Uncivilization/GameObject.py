@@ -6,6 +6,7 @@ import pickle
 import random
 
 from Uncivilization.Camera import *
+from Uncivilization.MapNameToInstructions import *
 
 
 class GameObject:
@@ -43,10 +44,14 @@ class GameState:
         self.grid_size = (25, 50)
         self.board = {}
         self.inMenu = True
+        self.inMapSelect = False
+        self.start_game = False
+        self.map_type = None
 
 
 class Renderer:
-    def __init__(self, display, camera):
+    def __init__(self, display, camera, assets):
+        self.assets = assets
         self.defaultColor = (0, 0, 0)
         self.extraLargeText = pg.font.SysFont("ubuntucondensed", 60)
         self.largeText = pg.font.SysFont("ubuntucondensed", 30)
@@ -60,10 +65,13 @@ class Renderer:
         self.full_redraw = True
         self.hex_buff = 5
         self.mainMenuBoxes = self.getMainMenuBoxes()
-        self.assets = {}
 
     def getMainMenuBoxes(
-        self, text_color=(255, 255, 255), background_color_1=(0, 0, 0), background_color_2=(0, 0, 0),center_1 = None
+        self,
+        text_color=(255, 255, 255),
+        background_color_1=(0, 0, 0),
+        background_color_2=(0, 0, 0),
+        center_1=None,
     ):
         title_string_1 = "UN"
         title_string_2 = "Civilzation"
@@ -80,7 +88,7 @@ class Renderer:
         sa, _ = TextSurfA.get_size()
         sb, _ = TextSurfB.get_size()
         centerax = (w - sb) / 2
-        centeray = h//2 if (center_1 is None or center_1 > h//2) else center_1
+        centeray = h // 2 if (center_1 is None or center_1 > h // 2) else center_1
         centerbx = (w + sa) / 2
 
         text_rectA = TextSurfA.get_rect(center=(centerax, centeray))
@@ -99,7 +107,11 @@ class Renderer:
             [TextSurf2, text_rect2],
         ]
 
-    def updateMainMenuBoxes(self, background_color_1=(0, 0, 0), background_color_2=(0, 0, 0),center_1 = None):
+    def updateMainMenuBoxes(
+        self, background_color_1=(0, 0, 0), background_color_2=(0, 0, 0), center_1=None
+    ):
         self.mainMenuBoxes = self.getMainMenuBoxes(
-            background_color_1=background_color_1, background_color_2=background_color_2, center_1 = center_1
+            background_color_1=background_color_1,
+            background_color_2=background_color_2,
+            center_1=center_1,
         )
