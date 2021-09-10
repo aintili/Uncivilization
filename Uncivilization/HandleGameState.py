@@ -19,8 +19,6 @@ def handleCollisions(game):
 
 
 def updateState(game):
-    cam = game.Renderer.camera
-    gamestate = game.GameState
     inputs = game.PlayerInput
     basicUserInputUpdateState(game)
     basicUserInputLogic(game)
@@ -32,8 +30,6 @@ def updateState(game):
 
 
 def updateStateMenu(game):
-    cam = game.Renderer.camera
-    gamestate = game.GameState
     inputs = game.PlayerInput
     basicUserInputUpdateStateMenu(game)
     basicUserInputLogicMenu(game)
