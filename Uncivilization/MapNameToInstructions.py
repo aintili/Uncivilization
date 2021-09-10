@@ -56,4 +56,6 @@ def random_tiles(game):
             state.board.update({f"{q},{r}": tile})
 
 
-MAP_TO_FUNC = {"random": random_tiles}
+MAP_TO_FUNC = {
+    "random": random_tiles
+    }

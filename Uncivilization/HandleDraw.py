@@ -106,3 +106,29 @@ def drawMenu(game):
 
     pg.display.update()
     diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)
+
+
+def drawMenu(game):
+    r = game.Renderer
+    display = r.display
+    display.fill((0,0,0))
+    boxes = r.mainMenuBoxes
+    for box_info in boxes:
+        surf, rect = box_info
+        pg.draw.rect(display, (0, 0, 0), rect)
+        display.blit(surf, rect)
+
+    pg.display.update()
+    diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)
+
+def drawMapSelect(game):
+    r = game.Renderer
+    display = r.display
+    display.fill((0,0,0))
+    rects = r.mapSelectBoxes
+    for rect in rects:
+        c = (100,100,100)
+        pg.draw.rect(display, c , rect)
+
+    pg.display.update()
+    diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)

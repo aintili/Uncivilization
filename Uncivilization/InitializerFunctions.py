@@ -14,35 +14,7 @@ from Uncivilization.MapNameToInstructions import *
 S3 = np.sqrt(3)
 
 
-def init_board(game):
-    f = MAP_TO_FUNC[game.GameState.map_type]
-    f(game)
-
-
-def start_game(GAME, clock, MAX_FPS):
-    t0 = time.time()
-    init_board(GAME)
-    s = True
-    while s:
-        # Frame rate no higher than FPS
-        clock.tick(MAX_FPS)
-
-        # Framerate independence, use dt
-        t1 = time.time()
-        dt = t1 - t0
-        t0 = t1
-        GAME.dt = dt
-
-        # standard game loop, poll inputs, process and update game state, render
-        updateInputs(GAME)
-        updateState(GAME)
-        draw(GAME)
-
-
-def mainMenu(raw_assets, sounds, player_config):
-    # t0
-    t0 = time.time()
-
+def initialize_game_object(raw_assets, sounds, player_config):
     # initialize pygame
     pg.init()
     pg.font.init()
@@ -51,17 +23,15 @@ def mainMenu(raw_assets, sounds, player_config):
     infoObject = pg.display.Info()
 
     # set default w/h
-    width = 9 * infoObject.current_w // 10
-    height = 9 * infoObject.current_h // 10
+    #width = 9 * infoObject.current_w // 10
+    #height = 9 * infoObject.current_h // 10
 
-    # width = 4*infoObject.current_w//10
-    # height = 4*infoObject.current_h//10
+    width = 15*infoObject.current_w//20
+    height = 15*infoObject.current_h//20
 
     # init screen
     display = pg.display.set_mode((width, height), pg.SRCALPHA)
 
-    # set default FPS and make timer to maintain it
-    MAX_FPS = 60
     clock = pg.time.Clock()
 
     # initialize Game object
@@ -69,33 +39,86 @@ def mainMenu(raw_assets, sounds, player_config):
     Player_Input = PlayerInput()
     Game_Renderer = Renderer(display, camera, raw_assets)
     Game_State = GameState()
-    GAME = GameObject(Player_Input, Game_State, Game_Renderer)
+    Audio_Mixer = AudioMixer(sounds)
+    GAME = GameObject(Player_Input, Game_State, Game_Renderer,Audio_Mixer)
 
     # set game icon
     pg.display.set_icon(raw_assets["icon.png"])
+    menuSelector(GAME,clock)
 
-    skip_animation = False
-    play_animation(GAME, clock, time.time(), sounds, skip_animation)
-    while Game_State.start_game is False:
-        clock.tick(MAX_FPS)
+
+def menuSelector(game,clock):
+    s = True
+    gamestate = game.GameState
+    while s:
+        if gamestate.inMainMenu:
+            mainMenu(game,clock)
+        
+        if gamestate.inMapSelect:
+            mapSelect(game,clock)
+        
+        if gamestate.start_game:
+            start_game(game, clock)
+
+
+def start_game(game, clock):
+    t0 = time.time()
+    init_board(game)
+    s = True
+    while s:
+        # Frame rate no higher than FPS
+        clock.tick(game.MAX_FPS)
+
+        # Framerate independence, use dt
         t1 = time.time()
         dt = t1 - t0
         t0 = t1
-        GAME.dt = dt
-        updateInputs(GAME)
-        if Game_State.inMenu:
+        game.dt = dt
+
+        # standard game loop, poll inputs, process and update game state, render
+        updateInputs(game)
+        updateState(game)
+        draw(game)
+
+
+def mapSelect(game,clock):
+    t0 = time.time()
+    gamestate = game.GameState
+    while gamestate.inMapSelect:
+        clock.tick(game.MAX_FPS)
+        
+        t1 = time.time()
+        dt = t1 - t0
+        t0 = t1
+        game.dt = dt
+
+        updateInputs(game)
+        updateStateMapSelect(game)
+        drawMapSelect(game)
+    
+    if gamestate.start_game:
+        game.AudioMixer.stop_all()
+
+def mainMenu(game,clock):
+    gamestate = game.GameState
+
+    play_animation(game, clock)
+    
+    # t0
+    t0 = time.time()
+    while gamestate.inMainMenu:
+        clock.tick(game.MAX_FPS)
+        t1 = time.time()
+        dt = t1 - t0
+        t0 = t1
+        game.dt = dt
+        updateInputs(game)
+        if gamestate.inMainMenu:
             # standard game loop, poll inputs, process and update game state, render
-            updateStateMenu(GAME)
-            drawMenu(GAME)
+            updateStateMenu(game)
+            drawMenu(game)
 
-        elif Game_State.inMapSelect:
-            updateStateMapSelect(GAME)
-            # drawMapSelect(GAME)
 
-    print("Waiting ~3s to simulate play game -> map select -> loading map")
-    time.sleep(3)
-
-    for key in sounds.keys():
-        sounds[key].stop()
-
-    start_game(GAME, clock, MAX_FPS)
+def init_board(game):
+    f = MAP_TO_FUNC[game.GameState.map_type]
+    f(game)

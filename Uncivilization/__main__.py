@@ -17,7 +17,7 @@ def main():
     assets = load_assets()
     sounds = load_sounds()
     player_config = load_player_config()
-    IF.mainMenu(assets, sounds, player_config)
+    IF.initialize_game_object(assets, sounds, player_config)
 
 
 def load_assets():

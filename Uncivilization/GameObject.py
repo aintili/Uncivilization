@@ -7,18 +7,20 @@ import random
 
 from Uncivilization.Camera import *
 from Uncivilization.MapNameToInstructions import *
-
+NUM_MAPS = 6
 
 class GameObject:
-    def __init__(self, player_input, game_state, renderer):
+    def __init__(self, player_input, game_state, renderer,audio_mixer):
         self.eps = 0.005
         self.dt = 2 ** 31
         self.TARGET_FPS = 60
+        self.MAX_FPS = 60
         self.drawDiagnostic = False
         self.cleanDiagnostic = False
         self.PlayerInput = player_input
         self.GameState = game_state
         self.Renderer = renderer
+        self.AudioMixer = audio_mixer
 
     def calc_fps(self):
         return 1 / self.dt
@@ -43,11 +45,25 @@ class GameState:
         self.isPaused = False
         self.grid_size = (25, 50)
         self.board = {}
-        self.inMenu = True
+        self.inMainMenu = True
         self.inMapSelect = False
         self.start_game = False
         self.map_type = None
+        self.skip_animation = False
 
+
+class AudioMixer:
+    def __init__(self,sounds):
+        self.sounds_dict = sounds
+
+    def stop_all(self):
+        for sound in self.sounds_dict.values():
+            sound.stop()
+    
+    def stop_all_except(self,exception_list):
+        for name,sound in self.sounds_dict.items():
+            if name not in exception_list:
+                sound.stop()
 
 class Renderer:
     def __init__(self, display, camera, assets):
@@ -65,6 +81,7 @@ class Renderer:
         self.full_redraw = True
         self.hex_buff = 5
         self.mainMenuBoxes = self.getMainMenuBoxes()
+        self.mapSelectBoxes = self.getMapSelectBoxes()
 
     def getMainMenuBoxes(
         self,
@@ -74,7 +91,7 @@ class Renderer:
         center_1=None,
     ):
         title_string_1 = "UN"
-        title_string_2 = "Civilzation"
+        title_string_2 = "Civilization"
         game_string = "Play Game"
         settings = "Settings"
         w = self.width
@@ -115,3 +132,46 @@ class Renderer:
             background_color_2=background_color_2,
             center_1=center_1,
         )
+    
+
+    def getMapSelectBoxes(self):
+        rows = 2
+        cols = NUM_MAPS // rows
+        
+        w = self.width
+        h = self.height
+
+        x_buff = max(w//50, 1)
+        y_buff = max(w//50, 1)
+        
+        x0 = w//8
+        y0 = h//8
+
+        w_takeup = (3*w)//4  
+        h_takeup = (3*h)//4
+        
+        space_xbuff = (cols + 1) * x_buff
+        space_ybuff = (rows + 1) * y_buff
+
+        r_w = (w_takeup - space_xbuff) // cols
+        r_h = (h_takeup - space_ybuff) // rows
+
+        wh = (r_w,r_h)
+        
+        rects = []
+        for i in range(NUM_MAPS):
+            row_num = i // (rows + 1)
+            col_num = i % (rows + 1) 
+            
+            tl_point = (
+                x0 + col_num * r_w + (col_num + 1) * x_buff,
+                y0 + row_num * r_h + (row_num + 1) * y_buff
+            )
+
+            rect = pg.Rect(tl_point,wh)
+            rects.append(rect)
+        
+        return rects
+        
+
+

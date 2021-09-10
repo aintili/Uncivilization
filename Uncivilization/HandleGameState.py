@@ -32,12 +32,13 @@ def updateState(game):
 
 def updateStateMenu(game):
     inputs = game.PlayerInput
-    basicUserInputUpdateStateMenu(game)
-    basicUserInputLogicMenu(game)
+    basicUserInputUpdateState_MainMenu(game)
+    basicUserInputLogic_MainMenu(game)
     inputs.mc_pos = None
 
 
 def updateStateMapSelect(game):
-    game.GameState.map_type = "random"
-    game.GameState.inMapSelect = False
-    game.GameState.start_game = True
+    inputs = game.PlayerInput
+    basicUserInputUpdateState_MapSelectMenu(game)
+    basicUserInputLogic_MapSelectMenu(game)
+    inputs.mc_pos = None

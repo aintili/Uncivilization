@@ -2,35 +2,41 @@ import pygame as pg
 import time
 
 
-def play_animation(game, clock, t0, sounds, skip_animation):
+def play_animation(game, clock):
+    gamestate = game.GameState
+    if not gamestate.skip_animation:
+        execute_animation(game,clock)
+
+
+def execute_animation(game,clock):
+    gamestate = game.GameState
     r = game.Renderer
     tfps = game.TARGET_FPS
+
     display = r.display
     h = r.height
     box, _, _, _ = r.mainMenuBoxes
+    
     surf, _ = box
     center_y = -surf.get_size()[1] / 2
-    timer = 0
+
+    audio_mixer = game.AudioMixer
+    
+    sounds = audio_mixer.sounds_dict
     violin = sounds["violin.wav"]
     record = sounds["record.wav"]
     fall = sounds["fall.wav"]
     crash = sounds["crash.wav"]
     doom = sounds["doom.wav"]
 
-    innocuous_events = [
-        pg.MOUSEWHEEL,
-        pg.MOUSEMOTION,
-        pg.WINDOWEVENT,
-        pg.ACTIVEEVENT,
-        pg.AUDIODEVICEADDED,
-        pg.VIDEOEXPOSE,
-    ]
-
     violin.play()
+
     violin_needs_stop = True
     record_needs_play = True
     fall_needs_play = True
 
+    t0 = time.time()
+    timer = 0
     while center_y <= h // 2:
         clock.tick(tfps)
 
@@ -38,15 +44,25 @@ def play_animation(game, clock, t0, sounds, skip_animation):
         for event in events:
             if event.type == pg.QUIT:
                 exit()
-            if event.type not in innocuous_events:
-                display.fill((0, 0, 0))
-                center_y = h // 2
-                for key in sounds.keys():
-                    sounds[key].stop()
-                doom.play()
-                skip_animation = True
+            if event.type == pg.KEYDOWN:
+                unicode_bool = event.unicode in "abcdefghijklmnopqrstuvwxyz" and event.unicode != ""
+                if unicode_bool or event.key == pg.K_ESCAPE:
+                    display.fill((0, 0, 0))
+                    center_y = h // 2
+                    audio_mixer.stop_all()
+                    doom.play()
+                    gamestate.skip_animation = True
 
-        if skip_animation:
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1 or event.button == 3:
+                    display.fill((0, 0, 0))
+                    center_y = h // 2
+                    audio_mixer.stop_all()
+                    doom.play()
+                    gamestate.skip_animation = True
+
+
+        if gamestate.skip_animation:
             break
 
         t1 = time.time()
@@ -87,15 +103,15 @@ def play_animation(game, clock, t0, sounds, skip_animation):
         pg.draw.rect(display, (0, 0, 0), rect)
         display.blit(surf, rect)
 
-    if skip_animation is False:
+    if not gamestate.skip_animation:
         crash.play()
-
-        pg.display.update()
-
-        fall.stop()
-        record.stop()
+        audio_mixer.stop_all_except(["crash.wav"])
+        # This delay before stopping seems pretty good!
         crash.stop()
+        
+        # Doom as soon as we update
+        pg.display.update()
         doom.play()
-
+    
     else:
         pg.display.update()

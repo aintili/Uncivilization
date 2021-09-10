@@ -3,25 +3,6 @@ import numpy as np
 
 from Uncivilization.Hex import *
 
-
-def basicUserInputUpdateStateMenu(game):
-    r = game.Renderer
-    inputs = game.PlayerInput
-    gamestate = game.GameState
-    events = inputs.events
-    for event in events:
-        if event.type == pg.QUIT:
-            quit()
-        elif event.type == pg.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                m_pos = pg.mouse.get_pos()
-                inputs.mc_pos = m_pos
-            if event.button == 3:
-                if game.drawDiagnostic:
-                    game.cleanDiagnostic = True
-                game.drawDiagnostic = not game.drawDiagnostic
-
-
 def updateInputs(game):
     inputs = game.PlayerInput
     inputs.events = pg.event.get()
@@ -74,6 +55,47 @@ def basicUserInputUpdateState(game):
         inputs.lc_held1 = None
 
 
+def basicUserInputUpdateState_MainMenu(game):
+    r = game.Renderer
+    inputs = game.PlayerInput
+    gamestate = game.GameState
+    events = inputs.events
+    for event in events:
+        if event.type == pg.QUIT:
+            quit()
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                m_pos = pg.mouse.get_pos()
+                inputs.mc_pos = m_pos
+            if event.button == 3:
+                if game.drawDiagnostic:
+                    game.cleanDiagnostic = True
+                game.drawDiagnostic = not game.drawDiagnostic
+
+
+def basicUserInputUpdateState_MapSelectMenu(game):
+    r = game.Renderer
+    inputs = game.PlayerInput
+    gamestate = game.GameState
+    events = inputs.events
+    for event in events:
+        if event.type == pg.QUIT:
+            quit()
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                m_pos = pg.mouse.get_pos()
+                inputs.mc_pos = m_pos
+            if event.button == 3:
+                if game.drawDiagnostic:
+                    game.cleanDiagnostic = True
+                game.drawDiagnostic = not game.drawDiagnostic
+        elif event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                gamestate.inMapSelect = False
+                gamestate.inMainMenu = True
+                gamestate.skip_animation = True
+
+
 def basicUserInputLogic(game):
     rend = game.Renderer
     gs = game.GameState
@@ -107,7 +129,7 @@ def basicUserInputLogic(game):
         rend.full_redraw = True
 
 
-def basicUserInputLogicMenu(game):
+def basicUserInputLogic_MainMenu(game):
     rend = game.Renderer
     gs = game.GameState
     inputs = game.PlayerInput
@@ -120,7 +142,7 @@ def basicUserInputLogicMenu(game):
     if mc_pos is not None:
         if rect_play.collidepoint(mc_pos):
             # We have hit play_game
-            gs.inMenu = False
+            gs.inMainMenu = False
             gs.inMapSelect = True
 
     if m_pos is not None:
@@ -132,3 +154,19 @@ def basicUserInputLogicMenu(game):
             rend.updateMainMenuBoxes()
     else:
         rend.updateMainMenuBoxes()
+
+
+def basicUserInputLogic_MapSelectMenu(game):
+    rend = game.Renderer
+    gs = game.GameState
+    inputs = game.PlayerInput
+    mc_pos = inputs.mc_pos
+    m_pos = inputs.m_pos
+    boxes = rend.mapSelectBoxes
+
+    if mc_pos is not None:
+        for box in boxes:
+            if box.collidepoint(mc_pos):
+                gs.inMapSelect = False
+                gs.start_game = True
+                gs.map_type = "random"
