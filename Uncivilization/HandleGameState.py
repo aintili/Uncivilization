@@ -19,6 +19,7 @@ def handleCollisions(game):
 
 
 def updateState(game):
+    gamestate = game.GameState
     inputs = game.PlayerInput
     basicUserInputUpdateState(game)
     basicUserInputLogic(game)
