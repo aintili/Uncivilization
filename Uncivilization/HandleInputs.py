@@ -3,6 +3,7 @@ import numpy as np
 
 from Uncivilization.Hex import *
 
+
 def updateInputs(game):
     inputs = game.PlayerInput
     inputs.events = pg.event.get()
@@ -47,6 +48,10 @@ def basicUserInputUpdateState(game):
                 inputs.scroll_dir = event.y
                 inputs.scrolling = True
 
+        elif event.type == pg.VIDEORESIZE:
+            r.width = event.w
+            r.height = event.h
+
     if pg.mouse.get_pressed()[0]:
         inputs.lc_held0 = inputs.lc_held1
         inputs.lc_held1 = pg.mouse.get_pos()
@@ -71,6 +76,9 @@ def basicUserInputUpdateState_MainMenu(game):
                 if game.drawDiagnostic:
                     game.cleanDiagnostic = True
                 game.drawDiagnostic = not game.drawDiagnostic
+        elif event.type == pg.VIDEORESIZE:
+            r.width = event.w
+            r.height = event.h
 
 
 def basicUserInputUpdateState_MapSelectMenu(game):
@@ -94,6 +102,10 @@ def basicUserInputUpdateState_MapSelectMenu(game):
                 gamestate.inMapSelect = False
                 gamestate.inMainMenu = True
                 gamestate.skip_animation = True
+
+        elif event.type == pg.VIDEORESIZE:
+            r.width = event.w
+            r.height = event.h
 
 
 def basicUserInputLogic(game):
@@ -163,10 +175,12 @@ def basicUserInputLogic_MapSelectMenu(game):
     mc_pos = inputs.mc_pos
     m_pos = inputs.m_pos
     boxes = rend.mapSelectBoxes
+    box = boxes[0]
 
     if mc_pos is not None:
-        for box in boxes:
-            if box.collidepoint(mc_pos):
-                gs.inMapSelect = False
-                gs.start_game = True
-                gs.map_type = "random"
+        if box.collidepoint(mc_pos):
+            gs.inMapSelect = False
+            gs.start_game = True
+            gs.map_type = "random"
+
+    rend.updateMapSelectBoxes()

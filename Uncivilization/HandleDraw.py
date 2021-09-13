@@ -5,6 +5,7 @@ import time
 
 from Uncivilization.Hex import *
 from Uncivilization.Camera import *
+from Uncivilization.MapNameToInstructions import *
 
 
 def draw_board(game):
@@ -88,7 +89,7 @@ def draw(game):
 
     if r.full_redraw:
         r.full_redraw = False
-        display.fill((0, 0, 0))
+        display.fill((200, 200, 200))
         draw_board(game)
         pg.display.update()
 
@@ -111,7 +112,7 @@ def drawMenu(game):
 def drawMenu(game):
     r = game.Renderer
     display = r.display
-    display.fill((0,0,0))
+    display.fill((0, 0, 0))
     boxes = r.mainMenuBoxes
     for box_info in boxes:
         surf, rect = box_info
@@ -121,14 +122,18 @@ def drawMenu(game):
     pg.display.update()
     diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)
 
-def drawMapSelect(game):
+
+def drawMapSelect(game, timer):
     r = game.Renderer
     display = r.display
-    display.fill((0,0,0))
+    display.fill((0, 0, 0))
     rects = r.mapSelectBoxes
     for rect in rects:
-        c = (100,100,100)
-        pg.draw.rect(display, c , rect)
+        c = (100, 100, 100)
+        pg.draw.rect(display, c, rect)
+
+    drawEffect = MAP_TO_DISPLAY["random"]
+    drawEffect(game, rects[0], c, timer)
 
     pg.display.update()
     diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)

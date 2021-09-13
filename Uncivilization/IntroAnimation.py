@@ -5,10 +5,10 @@ import time
 def play_animation(game, clock):
     gamestate = game.GameState
     if not gamestate.skip_animation:
-        execute_animation(game,clock)
+        execute_animation(game, clock)
 
 
-def execute_animation(game,clock):
+def execute_animation(game, clock):
     gamestate = game.GameState
     r = game.Renderer
     tfps = game.TARGET_FPS
@@ -16,12 +16,12 @@ def execute_animation(game,clock):
     display = r.display
     h = r.height
     box, _, _, _ = r.mainMenuBoxes
-    
+
     surf, _ = box
     center_y = -surf.get_size()[1] / 2
 
     audio_mixer = game.AudioMixer
-    
+
     sounds = audio_mixer.sounds_dict
     violin = sounds["violin.wav"]
     record = sounds["record.wav"]
@@ -39,7 +39,7 @@ def execute_animation(game,clock):
     timer = 0
     while center_y <= h // 2:
         clock.tick(tfps)
-
+        r.updateMainMenuBoxes()
         events = pg.event.get()
         for event in events:
             if event.type == pg.QUIT:
@@ -60,7 +60,6 @@ def execute_animation(game,clock):
                     audio_mixer.stop_all()
                     doom.play()
                     gamestate.skip_animation = True
-
 
         if gamestate.skip_animation:
             break
@@ -108,10 +107,10 @@ def execute_animation(game,clock):
         audio_mixer.stop_all_except(["crash.wav"])
         # This delay before stopping seems pretty good!
         crash.stop()
-        
+
         # Doom as soon as we update
         pg.display.update()
         doom.play()
-    
+
     else:
         pg.display.update()

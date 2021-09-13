@@ -7,10 +7,13 @@ import random
 
 from Uncivilization.Camera import *
 from Uncivilization.MapNameToInstructions import *
+
 NUM_MAPS = 6
+NUM_CHARACTERS = 6
+
 
 class GameObject:
-    def __init__(self, player_input, game_state, renderer,audio_mixer):
+    def __init__(self, player_input, game_state, renderer, audio_mixer):
         self.eps = 0.005
         self.dt = 2 ** 31
         self.TARGET_FPS = 60
@@ -53,17 +56,27 @@ class GameState:
 
 
 class AudioMixer:
-    def __init__(self,sounds):
+    def __init__(self, sounds):
         self.sounds_dict = sounds
 
     def stop_all(self):
         for sound in self.sounds_dict.values():
             sound.stop()
-    
-    def stop_all_except(self,exception_list):
-        for name,sound in self.sounds_dict.items():
+
+    def stop_all_except(self, exception_list):
+        for name, sound in self.sounds_dict.items():
             if name not in exception_list:
                 sound.stop()
+
+    def fadeout_all(self, fadeout_time=750):
+        for sound in self.sounds_dict.values():
+            sound.fadeout(fadeout_time)
+
+    def fadeout_all_except(self, exception_list, fadeout_time=750):
+        for name, sound in self.sounds_dict.items():
+            if name not in exception_list:
+                sound.fadeout(fadeout_time)
+
 
 class Renderer:
     def __init__(self, display, camera, assets):
@@ -79,9 +92,12 @@ class Renderer:
         self.to_update = []
         self.camera = camera
         self.full_redraw = True
-        self.hex_buff = 5
+        self.default_hex_buff = 5
+        self.current_hex_buff = None
+        self.default_hex_asset_size = (238,274)
         self.mainMenuBoxes = self.getMainMenuBoxes()
         self.mapSelectBoxes = self.getMapSelectBoxes()
+        self.mapSelectRedraw = None
 
     def getMainMenuBoxes(
         self,
@@ -94,8 +110,10 @@ class Renderer:
         title_string_2 = "Civilization"
         game_string = "Play Game"
         settings = "Settings"
+
         w = self.width
         h = self.height
+
         largeText = self.largeText
         extraLargeText = self.extraLargeText
 
@@ -132,46 +150,90 @@ class Renderer:
             background_color_2=background_color_2,
             center_1=center_1,
         )
-    
 
-    def getMapSelectBoxes(self):
-        rows = 2
-        cols = NUM_MAPS // rows
-        
+    def generate_rect_for_plot(self, size, start_tl, takeup, plot_coord, x_buff=None, y_buff=None):
         w = self.width
         h = self.height
 
-        x_buff = max(w//50, 1)
-        y_buff = max(w//50, 1)
-        
-        x0 = w//8
-        y0 = h//8
+        x_buff = x_buff if x_buff else max(w // 50, 1)
+        y_buff = y_buff if y_buff else max(w // 50, 1)
 
-        w_takeup = (3*w)//4  
-        h_takeup = (3*h)//4
-        
+        rows, cols = size
+        x0, y0 = start_tl
+        w_takeup, h_takeup = takeup
+
         space_xbuff = (cols + 1) * x_buff
         space_ybuff = (rows + 1) * y_buff
 
         r_w = (w_takeup - space_xbuff) // cols
         r_h = (h_takeup - space_ybuff) // rows
 
-        wh = (r_w,r_h)
-        
+        wh = (r_w, r_h)
+
+        row_num, col_num = plot_coord
+
+        tl_point = (
+            x0 + col_num * r_w + (col_num + 1) * x_buff,
+            y0 + row_num * r_h + (row_num + 1) * y_buff,
+        )
+        return pg.Rect(tl_point, wh)
+
+    def getMapSelectBoxes(self):
+        w = self.width
+        h = self.height
+
+        rows = 2
+        cols = NUM_MAPS // rows
+
+        x0 = w // 8
+        y0 = h // 16
+
+        w_takeup = (3 * w) // 4
+        h_takeup = h // 2
+
         rects = []
         for i in range(NUM_MAPS):
             row_num = i // (rows + 1)
-            col_num = i % (rows + 1) 
-            
-            tl_point = (
-                x0 + col_num * r_w + (col_num + 1) * x_buff,
-                y0 + row_num * r_h + (row_num + 1) * y_buff
+            col_num = i % (rows + 1)
+            rect = self.generate_rect_for_plot(
+                (rows, cols), (x0, y0), (w_takeup, h_takeup), (row_num, col_num)
             )
-
-            rect = pg.Rect(tl_point,wh)
             rects.append(rect)
-        
+
+        rows = 1
+        cols = 1
+
+        x0 = w // 8
+        y0 = (8 * h) // 15
+
+        w_takeup = (3 * w) // 4
+        h_takeup = h // 4
+
+        row_num = 0
+        col_num = 0
+        rect = self.generate_rect_for_plot(
+            (rows, cols), (x0, y0), (w_takeup, h_takeup), (row_num, col_num)
+        )
+        rects.append(rect)
+
+        rows = 1
+        cols = NUM_CHARACTERS
+
+        x0 = w // 8
+        y0 = (3 * h) // 4
+
+        w_takeup = (3 * w) // 4
+        h_takeup = h // 5
+
+        row_num = 0
+        for i in range(NUM_CHARACTERS):
+            col_num = i
+            rect = self.generate_rect_for_plot(
+                (rows, cols), (x0, y0), (w_takeup, h_takeup), (row_num, col_num)
+            )
+            rects.append(rect)
+
         return rects
-        
 
-
+    def updateMapSelectBoxes(self):
+        self.mapSelectBoxes = self.getMapSelectBoxes()

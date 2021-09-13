@@ -1,4 +1,5 @@
 import os
+import configparser
 import pkg_resources
 import pygame as pg
 import time
@@ -13,7 +14,7 @@ CONFIG_DIR = pkg_resources.resource_filename("Uncivilization", "config/")
 def main():
     # pip install -e path/to/Uncivilization will install
     # this as a package. Command Unciv will call this function
-
+    print()
     assets = load_assets()
     sounds = load_sounds()
     player_config = load_player_config()
@@ -44,7 +45,10 @@ def load_sounds():
 
 
 def load_player_config():
-    pass
+    cp = configparser.ConfigParser()
+    config_file = os.path.join(CONFIG_DIR, "config.ini")
+    cp.read(config_file)
+    return cp
 
 
 main()
