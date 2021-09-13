@@ -94,7 +94,7 @@ class Renderer:
         self.full_redraw = True
         self.default_hex_buff = 5
         self.current_hex_buff = None
-        self.default_hex_asset_size = (238,274)
+        self.default_hex_asset_size = (238, 274)
         self.mainMenuBoxes = self.getMainMenuBoxes()
         self.mapSelectBoxes = self.getMapSelectBoxes()
         self.mapSelectRedraw = None

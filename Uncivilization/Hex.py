@@ -134,7 +134,7 @@ def screen_pixel_to_axial(game, pixel):
     return hex_round(v)
 
 
-def get_bordered_hex_scale(game,S_0,new_hex_size,hex_buffer=None):
+def get_bordered_hex_scale(game, S_0, new_hex_size, hex_buffer=None):
     # S_0 is the hex asset height, ie 2 * hex_size, including border
     r = game.Renderer
     hex_buffer = hex_buffer if hex_buffer else r.current_hex_buff
@@ -142,13 +142,14 @@ def get_bordered_hex_scale(game,S_0,new_hex_size,hex_buffer=None):
     s_0 = S_0 - (2 * hex_buffer)
     s_1 = 2 * new_hex_size
 
-    rS_0 = S_0/s_0
+    rS_0 = S_0 / s_0
     twice_r1_buff = s_1 * (rS_0 - 1)
 
     S_1 = twice_r1_buff + s_1
     w_1 = S_1 * S3 * 0.5
     scale = (int(round(w_1)), int(round(S_1)))
     return scale
+
 
 class Hex:
     def __init__(self, cube=None, q=None, r=None, images=[]):
@@ -205,11 +206,10 @@ class Hex:
         size = r.camera.hex_size
 
         loaded_image = assets[img]
-        _ , twice_hex_size = loaded_image.get_size()
-        scale = get_bordered_hex_scale(game,twice_hex_size,size,r.current_hex_buff)
+        _, twice_hex_size = loaded_image.get_size()
+        scale = get_bordered_hex_scale(game, twice_hex_size, size)
         new_image = pg.transform.scale(loaded_image, scale)
         img_w, img_h = new_image.get_size()
-        # border
 
         x0, y0 = axial_to_screen_pixel(game, self.v)
         center = (x0 - img_w / 2, y0 - img_h / 2)

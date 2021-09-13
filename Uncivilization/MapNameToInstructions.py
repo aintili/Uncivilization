@@ -5,6 +5,7 @@ import time
 
 from Uncivilization.Hex import *
 
+
 def convert_hexes(game):
     t0 = time.time()
 
@@ -12,8 +13,10 @@ def convert_hexes(game):
     camera = r.camera
     mid_size = camera.hex_size
 
-    _ , twice_hex_size = r.default_hex_asset_size
-    mid_scale = get_bordered_hex_scale(game,twice_hex_size,mid_size,hex_buffer=r.default_hex_buff)
+    _, twice_hex_size = r.default_hex_asset_size
+    mid_scale = get_bordered_hex_scale(
+        game, twice_hex_size, mid_size, hex_buffer=r.default_hex_buff
+    )
 
     r.assets = {
         img_name: pg.transform.scale(img.convert_alpha(), mid_scale)
@@ -21,7 +24,7 @@ def convert_hexes(game):
     }
 
     img = r.assets[list(r.assets.keys())[0]]
-    _,img_h = img.get_size()
+    _, img_h = img.get_size()
 
     r.current_hex_buff = (img_h - 2 * mid_size) / 2
 
