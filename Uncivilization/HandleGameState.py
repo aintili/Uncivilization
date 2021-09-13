@@ -37,8 +37,17 @@ def updateStateMenu(game):
     inputs.mc_pos = None
 
 
+def updateStateSettingsMenu(game):
+    inputs = game.PlayerInput
+    basicUserInputUpdateState_SettingsMenu(game)
+    basicUserInputLogic_SettingsMenu(game)
+    inputs.mc_pos = None
+
+
 def updateStateMapSelect(game):
     inputs = game.PlayerInput
     basicUserInputUpdateState_MapSelectMenu(game)
     basicUserInputLogic_MapSelectMenu(game)
     inputs.mc_pos = None
+
+

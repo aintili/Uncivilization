@@ -164,6 +164,10 @@ def mainMenu(game, clock):
             # standard game loop, poll inputs, process and update game state, render
             updateStateMenu(game)
             drawMenu(game)
+        
+        if gamestate.inSettingsMenu:
+            updateStateSettingsMenu(game)
+            drawSettingsMenu(game)
 
 
 def init_board(game):

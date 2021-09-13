@@ -184,3 +184,10 @@ def basicUserInputLogic_MapSelectMenu(game):
             gs.map_type = "random"
 
     rend.updateMapSelectBoxes()
+
+
+def basicUserInputUpdateState_SettingsMenu(game):
+    pass
+
+def basicUserInputLogic_SettingsMenu(game):
+    pass

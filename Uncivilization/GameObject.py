@@ -50,6 +50,7 @@ class GameState:
         self.board = {}
         self.inMainMenu = True
         self.inMapSelect = False
+        self.inSettingsMenu = False
         self.start_game = False
         self.map_type = None
         self.skip_animation = False
