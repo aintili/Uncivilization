@@ -72,12 +72,9 @@ def pixel_to_axial(game, pixel):
     Returns correct axial coord given an unrestricted pixel
     """
     r = game.Renderer
-    x0, y0 = r.origin
     cam = r.camera
-    size = cam.hex_size
-    x, y = pixel
-    pixel = np.array([x - x0, y - y0])
 
+    size = cam.hex_asset_size[1] / 2
     v = (1 / size) * np.matmul(TO_AXIAL, pixel)
     return hex_round(v)
 
@@ -87,34 +84,51 @@ def axial_to_pixel(game, v):
     Given an axial coordinate, return an unrestricted pixel
     """
     r = game.Renderer
-    x0, y0 = r.origin
     cam = r.camera
-    size = cam.hex_size
-    offx, offy = cam.get_camera_offset(game)
+    size = cam.hex_asset_size[1] / 2
 
     x, y = size * np.matmul(TO_PIXEL, v)
-    x = x + x0
-    y = y + y0
     return x, y
 
 
-def axial_to_screen_pixel(game, v):
+def axial_to_display_pixel(game, v):
     """
-    Given an axial coordinate, return the center pixel for the screen
+    Given an axial coordinate, return the center pixel for the display
     """
     r = game.Renderer
-    x0, y0 = r.origin
     cam = r.camera
-    size = cam.hex_size
+    size = cam.hex_asset_size[1] / 2
+
     offx, offy = cam.get_camera_offset(game)
 
     x, y = size * np.matmul(TO_PIXEL, v)
-    x = x + x0 + offx
-    y = y + y0 + offy
+    surf_cen = cam.get_surface_center()
+    x = x - offx + surf_cen[0]
+    y = y - offy + surf_cen[1]
     return x, y
 
 
-def screen_pixel_to_axial(game, pixel):
+def display_pixel_to_axial(game, pixel):
+    """
+    Returns correct axial coord given a pixel restricted to [[0,w],[0,h]],
+    considers camera's location
+    """
+
+    r = game.Renderer
+    cam = r.camera
+    size = cam.hex_asset_size[1] / 2
+    offx, offy = cam.get_camera_offset(game)
+    surf_cen = cam.get_surface_center()
+
+    x, y = pixel
+    pixel = [x - surf_cen[0] + offx, y - surf_cen[1] + offy]
+    pixel = np.array(pixel)
+
+    v = (1 / size) * np.matmul(TO_AXIAL, pixel)
+    return hex_round(v)
+
+
+def screen_pixel_to_axial(game, screen_pixel):
     """
     Returns correct axial coord given a pixel restricted to [[0,w],[0,h]],
     considers camera's location
@@ -123,32 +137,15 @@ def screen_pixel_to_axial(game, pixel):
     r = game.Renderer
     x0, y0 = r.origin
     cam = r.camera
-    size = cam.hex_size
     offx, offy = cam.get_camera_offset(game)
+    R = cam.screen_to_display_ratio
 
-    x, y = pixel
-    pixel = [x - x0 - offx, y - y0 - offy]
-    pixel = np.array(pixel)
+    x, y = screen_pixel
+    x /= R
+    y /= R
 
-    v = (1 / size) * np.matmul(TO_AXIAL, pixel)
-    return hex_round(v)
-
-
-def get_bordered_hex_scale(game, S_0, new_hex_size, hex_buffer=None):
-    # S_0 is the hex asset height, ie 2 * hex_size, including border
-    r = game.Renderer
-    hex_buffer = hex_buffer if hex_buffer else r.current_hex_buff
-
-    s_0 = S_0 - (2 * hex_buffer)
-    s_1 = 2 * new_hex_size
-
-    rS_0 = S_0 / s_0
-    twice_r1_buff = s_1 * (rS_0 - 1)
-
-    S_1 = twice_r1_buff + s_1
-    w_1 = S_1 * S3 * 0.5
-    scale = (int(round(w_1)), int(round(S_1)))
-    return scale
+    pixel = np.array([x, y])
+    return display_pixel_to_axial(game, pixel)
 
 
 class Hex:
@@ -178,11 +175,11 @@ class Hex:
         q, r = self.v
         render = game.Renderer
         origin = render.origin
-        display = render.display
         cam = render.camera
-        size = cam.hex_size
+        display = cam.surface
+        size = cam.hex_asset_size[1] / 2
 
-        x, y = axial_to_screen_pixel(game, self.v)
+        x, y = axial_to_display_pixel(game, self.v)
 
         coord_s = ""
         if ctype == "axial" or ctype == "both":
@@ -196,28 +193,26 @@ class Hex:
             col, row = axial_to_doubled([q, r])
             coord_s += f"{col} , {row}"
 
-        TextSurf = render.smallText.render(coord_s, False, (0, 0, 0))
+        TextSurf = render.coordText.render(coord_s, False, (1, 1, 1))
         text_rect = TextSurf.get_rect(center=(x, y))
         display.blit(TextSurf, text_rect)
 
     def get_image(self, game, img="dark_blue_hex_and_border.png"):
         r = game.Renderer
-        assets = r.assets
-        size = r.camera.hex_size
+        assets = r.assets["base_hexes"]
 
         loaded_image = assets[img]
-        _, twice_hex_size = loaded_image.get_size()
-        scale = get_bordered_hex_scale(game, twice_hex_size, size)
-        new_image = pg.transform.scale(loaded_image, scale)
-        img_w, img_h = new_image.get_size()
+        img_w, img_h = loaded_image.get_size()
+        #print(img_w,img_h)
+        x0, y0 = axial_to_display_pixel(game, self.v)
+        dest = (x0 - img_w / 2, y0 - img_h / 2)
 
-        x0, y0 = axial_to_screen_pixel(game, self.v)
-        center = (x0 - img_w / 2, y0 - img_h / 2)
+        return loaded_image, dest
 
-        return new_image, center
-
-    def draw_tile_images(self, game):
-        display = game.Renderer.display
+    def draw_tile_images_to_display(self, game):
+        rend = game.Renderer
+        camera = rend.camera
+        display = camera.surface
         for image in self.images:
-            img, center = self.get_image(game, img=image)
-            display.blit(img, center)
+            asset, dest = self.get_image(game, img=image)
+            display.blit(asset, dest)

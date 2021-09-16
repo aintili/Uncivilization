@@ -6,134 +6,121 @@ INV_S3 = S3 * (1 / 3)
 
 
 class Camera:
-    def __init__(self, w, h, center, n_max=14, n_min=5):
-        self.MIN_HEX_SIZE = w / (n_max * S3)
-        self.MAX_HEX_SIZE = w / (n_min * S3)
-        self.w = w
-        self.h = h
-        self.center = center
+    def __init__(self, hex_asset_size, w_scr, h_scr, rows, cols, n_max=14, n_min=4):
+        self.n_min = n_min
+        self.n_max = n_max
+        self.hex_asset_size = hex_asset_size
+        self.hex_size = 0.5 * self.hex_asset_size[1]
+        self.w_scr = w_scr
+        self.h_scr = h_scr
+        self.screen_ratio = h_scr / w_scr
+        self.n_mid = (n_max + n_min) // 2
+        w = int(self.n_mid * hex_asset_size[0])
+        h = int(w * self.screen_ratio)
+        self.surface = pg.Surface((w, h))
+        self.w_max = n_max * hex_asset_size[0]
+        self.h_max = self.w_max * self.screen_ratio
+        self.w_min = n_min * hex_asset_size[0]
+        self.h_min = self.w_min * self.screen_ratio
+        self.center = (0, 0)
+        self.screen_to_display_ratio = self.w_scr / w
         self.is_stationary = True
         self.reverse = False
-        self.hex_size = (self.MAX_HEX_SIZE + self.MIN_HEX_SIZE) / 2
+        self.zoom_level = 1
+
+        ###### doubled coords #######
+        max_row = rows // 2
+        min_row = abs(-rows // 2)
+        
+        self.pos_x = 0.5 * (cols + 1) * self.hex_asset_size[0]
+        self.neg_x = -0.5 * (cols + 2)* self.hex_asset_size[0]
+
+        self.pos_y = self.get_row_boundary(max_row)
+        self.neg_y = -self.get_row_boundary(min_row)
+
+        print(self.pos_x - self.neg_x)
+        print(self.pos_y - self.neg_y)
+        #############################
+
+    def get_row_boundary(self, row):
+        r = row // 2
+        r *= 3
+        r += 1 if row % 2 == 0 else 2.5
+        return self.hex_size * r
+
+
+    def get_surface_center(self):
+        w, h = self.surface.get_size()
+        return (w / 2, h / 2)
 
     def get_bottom_right_and_top_left(self, center=None):
-        c_x, c_y = self.center if center is None else center
-        br = (c_x + self.w / 2, c_y + self.h / 2)
-        tl = (c_x - self.w / 2, c_y - self.h / 2)
+        cx, cy = self.center if center is None else center
+        hw, hh = [s / 2 for s in self.surface.get_size()]
+        br = (cx + hw, cy + hh)
+        tl = (cx - hw, cy - hh)
         return br, tl
 
     def get_camera_offset(self, game):
-        o_x, o_y = game.Renderer.origin
-        c_x, c_y = self.center
-        return (o_x - c_x, o_y - c_y)
+        return self.center
 
-    def update_hex_size(self, hex_size, game):
-        if hex_size > self.MAX_HEX_SIZE:
-            self.hex_size = self.MAX_HEX_SIZE
-        elif hex_size < self.MIN_HEX_SIZE:
-            self.hex_size = self.MIN_HEX_SIZE
-        else:
-            self.hex_size = hex_size
+    def update_zoom_level(self, zl, game):
+        cw, ch = self.surface.get_size()
+        nw, nh = (cw * zl, ch * zl)
 
-    def add_to_hex_size(self, incr, game):
-        new_hex_size = self.hex_size + incr
-        self.update_hex_size(new_hex_size, game)
+        if nw > self.w_max or nh > self.h_max:
+            nw = self.w_max
+            nh = self.h_max
+
+        elif nw < self.w_min or nh < self.h_min:
+            nw = self.w_min
+            nh = self.h_min
+
+        self.surface = pg.Surface((nw, nh))
+        self.screen_to_display_ratio = self.w_scr / nw
+
+    def zoom(self, incr, game):
+        new_zoom = self.zoom_level + incr
+        self.update_zoom_level(new_zoom, game)
 
     def update_center(self, cen, game):
-        board = game.GameState.board
+        gs = game.GameState
+        board = gs.board
         cx, cy = cen
         row, col = game.GameState.grid_size
+        w, h = self.surface.get_size()
 
-        max_col = col + 1
-        min_col = -col - 1
+        pos_x = self.pos_x
+        pos_y = self.pos_y
 
-        max_row = row // 2 + 1
-        min_row = -row // 2 - 1
+        neg_x = self.neg_x
+        neg_y = self.neg_y
 
         br, tl = self.get_bottom_right_and_top_left(center=cen)
 
-        # Overshot right
-        v0 = doubled_to_axial(0, max_col)
-        v1 = doubled_to_axial(1, max_col)
+        # # Overshot right
+        if br[0] > pos_x:
+            cx = pos_x - w / 2
 
-        x0, y0 = axial_to_pixel(game, v0)
-        x1, y1 = axial_to_pixel(game, v1)
+        # # Overshot left
+        if tl[0] < neg_x:
+            cx = neg_x + w / 2
 
-        if x1 > x0:
-            x0 = x1
+        # # Overshot up
+        if tl[1] < neg_y:
+            cy = neg_y + h / 2
 
-        max_right = x0 + S3 * self.hex_size / 2
-        if br[0] > max_right:
-            cx = max_right - self.w / 2
-
-        # Overshot left
-        v0 = doubled_to_axial(0, min_col)
-        v1 = doubled_to_axial(1, min_col)
-
-        x0, y0 = axial_to_pixel(game, v0)
-        x1, y1 = axial_to_pixel(game, v1)
-
-        if x1 < x0:
-            x0 = x1
-
-        min_left = x0 - S3 * self.hex_size / 2
-
-        if tl[0] < min_left:
-            cx = min_left + self.w / 2
-
-        # Overshot up
-        v0 = doubled_to_axial(min_row, 1) if min_row % 2 == 1 else doubled_to_axial(min_row, 0)
-        x0, y0 = axial_to_pixel(game, v0)
-
-        min_up = y0 - self.hex_size
-        if tl[1] < min_up:
-            cy = min_up + self.h / 2
-
-        # Overshot down
-        v0 = doubled_to_axial(max_row, 1) if max_row % 2 == 1 else doubled_to_axial(max_row, 0)
-        x0, y0 = axial_to_pixel(game, v0)
-
-        max_down = y0 + self.hex_size
-        if br[1] > max_down:
-            cy = max_down - self.h / 2
+        # # Overshot down
+        if br[1] > pos_y:
+            cy = pos_y - h / 2
 
         self.center = (cx, cy)
+
 
     def add_to_center(self, incr, game):
         x1, y1 = incr
         x0, y0 = self.center
         new_center = (x1 + x0, y1 + y0)
         self.update_center(new_center, game)
-
-    def zoom_recenter_method1(self, game):
-        inputs = game.PlayerInput
-
-        # Instead of figuring out how increase the size
-        # of a hex proportionally to shrinking camera window
-        # we just increase the drawing size and shift
-        # the camera as needed
-
-        # Before we do anything, get the 'old' (really the current)
-        # pixel value of the center of the hex at camera center
-        old_v = pixel_to_axial(game, self.center)
-        x_old, y_old = axial_to_pixel(game, old_v)
-
-        # Update the hex_size however we want
-        scroll_sp = 5
-        scroll_amt = inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
-        self.add_to_hex_size(scroll_amt, game)
-
-        # Now get the new center pixel for the same tile
-        # and update the camera's position
-        x_new, y_new = axial_to_pixel(game, old_v)
-
-        dx = x_new - x_old
-        dy = y_new - y_old
-
-        self.add_to_center((dx, dy), game)
-
-        # This is 100% big brain approach, so it means it will probably
-        # work most but not all of the time
 
     def zoom_recenter_method2(self, game):
         inputs = game.PlayerInput
@@ -163,20 +150,27 @@ class Camera:
 
         Y_old = yc - y0_old
         X_old = xc - x0_old
-        size_old = self.hex_size
+        size_old = self.apparent_hex_size
         H_old = 0.5 * S3 * size_old  # height of equilateral triangle
         R = Y_old / H_old
 
-        scroll_sp = 10
+        scroll_sp = 0.5
         scroll_amt = inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
-        self.add_to_hex_size(scroll_amt, game)
+        self.update_apparent_hex_size(scroll_amt, game)
 
         x0_new, y0_new = axial_to_pixel(game, v)
 
-        Y_new = (self.hex_size / size_old) * Y_old
+        Y_new = (self.apparent_hex_size / size_old) * Y_old
         yc_new = Y_new + y0_new
 
-        X_new = (self.hex_size / size_old) * X_old
+        X_new = (self.apparent_hex_size / size_old) * X_old
         xc_new = X_new + x0_new
 
         self.update_center((xc_new, yc_new), game)
+
+    def zoom_recenter_method3(self, game):
+        inputs = game.PlayerInput
+        scroll_sp = 0.3
+        scroll_amt = -1 * inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
+        self.zoom(scroll_amt, game)
+        self.update_center(self.center, game)

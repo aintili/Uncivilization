@@ -5,7 +5,7 @@ import json
 import pickle
 import random
 
-from Uncivilization.Camera import *
+#from Uncivilization.Camera import *
 from Uncivilization.MapNameToInstructions import *
 
 NUM_MAPS = 6
@@ -46,7 +46,9 @@ class PlayerInput:
 class GameState:
     def __init__(self):
         self.isPaused = False
-        self.grid_size = (25, 50)
+        self.rows = 20
+        self.cols = 50
+        self.grid_size = (self.rows, self.cols)
         self.board = {}
         self.inMainMenu = True
         self.inMapSelect = False
@@ -80,18 +82,21 @@ class AudioMixer:
 
 
 class Renderer:
-    def __init__(self, display, camera, assets):
+    def __init__(self, screen, assets, n_max = 14, n_min = 4):
         self.assets = assets
+        self.n_max = n_max
+        self.n_min = n_min
         self.defaultColor = (0, 0, 0)
         self.extraLargeText = pg.font.SysFont("ubuntucondensed", 60)
         self.largeText = pg.font.SysFont("ubuntucondensed", 30)
         self.smallText = pg.font.SysFont("ubuntucondensed", 20)
-        self.display = display
+        self.coordText = pg.font.SysFont("ubuntucondensed", 40)
+        self.screen = screen
         self.width = pg.display.get_surface().get_width()
         self.height = pg.display.get_surface().get_height()
         self.origin = (self.width // 2, self.height // 2)
         self.to_update = []
-        self.camera = camera
+        self.camera = None
         self.full_redraw = True
         self.default_hex_buff = 5
         self.current_hex_buff = None

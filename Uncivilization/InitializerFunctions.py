@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import pygame as pg
-import pprint
 import time
 
 from Uncivilization.GameObject import *
@@ -70,23 +69,23 @@ def initialize_game_object(raw_assets, sounds, player_config):
     video_info = video_info.lower().strip(" ").split("x")
     video_info = video_info[0] if len(video_info) == 1 else (int(video_info[0]), int(video_info[1]))
     width, height = video_info if len(video_info) == 2 else (width, height)
-    # video_flags = pg.SRCALPHA | pg.FULLSCREEN | pg.SCALED if video_info == "fullscreen" else pg.SRCALPHA
-    # display = pg.display.set_mode(size = (width, height), flags = video_flags)
     width, height = closest_res(width, height)
-    display = pg.display.set_mode(size=(width, height))
+    screen = pg.display.set_mode(size=(width, height))
 
     clock = pg.time.Clock()
 
     # initialize Game object
-    camera = Camera(width, height, (width // 2, height // 2))
-    Player_Input = PlayerInput()
-    Game_Renderer = Renderer(display, camera, raw_assets)
     Game_State = GameState()
+    hex_asset_size = raw_assets["base_hexes"]["red_hex_and_border.png"].get_size()
+    rows, cols = Game_State.grid_size
+    #camera = Camera(hex_asset_size, width, height, rows, cols)
+    Player_Input = PlayerInput()
+    Game_Renderer = Renderer(screen, raw_assets)
     Audio_Mixer = AudioMixer(sounds)
     GAME = GameObject(Player_Input, Game_State, Game_Renderer, Audio_Mixer)
 
     # set game icon
-    pg.display.set_icon(raw_assets["icon.png"])
+    pg.display.set_icon(raw_assets["initial_screen"]["icon.png"])
     menuSelector(GAME, clock)
 
 
@@ -164,7 +163,7 @@ def mainMenu(game, clock):
             # standard game loop, poll inputs, process and update game state, render
             updateStateMenu(game)
             drawMenu(game)
-        
+
         if gamestate.inSettingsMenu:
             updateStateSettingsMenu(game)
             drawSettingsMenu(game)

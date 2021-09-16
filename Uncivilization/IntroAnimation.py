@@ -13,7 +13,7 @@ def execute_animation(game, clock):
     r = game.Renderer
     tfps = game.TARGET_FPS
 
-    display = r.display
+    screen = r.screen
     h = r.height
     box, _, _, _ = r.mainMenuBoxes
 
@@ -47,7 +47,7 @@ def execute_animation(game, clock):
             if event.type == pg.KEYDOWN:
                 unicode_bool = event.unicode in "abcdefghijklmnopqrstuvwxyz" and event.unicode != ""
                 if unicode_bool or event.key == pg.K_ESCAPE:
-                    display.fill((0, 0, 0))
+                    screen.fill((0, 0, 0))
                     center_y = h // 2
                     audio_mixer.stop_all()
                     doom.play()
@@ -55,7 +55,7 @@ def execute_animation(game, clock):
 
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1 or event.button == 3:
-                    display.fill((0, 0, 0))
+                    screen.fill((0, 0, 0))
                     center_y = h // 2
                     audio_mixer.stop_all()
                     doom.play()
@@ -90,8 +90,8 @@ def execute_animation(game, clock):
 
         for box_info in boxes:
             surf, rect = box_info
-            pg.draw.rect(display, (0, 0, 0), rect)
-            display.blit(surf, rect)
+            pg.draw.rect(screen, (0, 0, 0), rect)
+            screen.blit(surf, rect)
 
         pg.display.update()
 
@@ -99,8 +99,8 @@ def execute_animation(game, clock):
     boxes = [r.mainMenuBoxes[0], r.mainMenuBoxes[1]]
     for box_info in boxes:
         surf, rect = box_info
-        pg.draw.rect(display, (0, 0, 0), rect)
-        display.blit(surf, rect)
+        pg.draw.rect(screen, (0, 0, 0), rect)
+        screen.blit(surf, rect)
 
     if not gamestate.skip_animation:
         crash.play()

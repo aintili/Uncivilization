@@ -24,10 +24,17 @@ def main():
 def load_assets():
     # Load assets
     t0 = time.time()
-    assets = {img: pg.image.load(os.path.join(IMAGES_DIR, img)) for img in os.listdir(IMAGES_DIR)}
+    n_assets = 0
+    assets = {"base_hexes": {}, "initial_screen": {}}
+    for img in os.listdir(IMAGES_DIR):
+        loaded_img = pg.image.load(os.path.join(IMAGES_DIR, img))
+        img_category = "base_hexes" if "hex" in img and "and_border" in img else "initial_screen"
+        assets[img_category].update({img: loaded_img})
+        n_assets += 1
+
     dt = time.time() - t0
     dt = format(1000 * dt, "0.2f")
-    print(f"Found {len(assets.keys())} raw assets in {dt} ms")
+    print(f"Found {n_assets} raw assets in {dt} ms")
     return assets
 
 

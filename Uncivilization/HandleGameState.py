@@ -49,5 +49,3 @@ def updateStateMapSelect(game):
     basicUserInputUpdateState_MapSelectMenu(game)
     basicUserInputLogic_MapSelectMenu(game)
     inputs.mc_pos = None
-
-

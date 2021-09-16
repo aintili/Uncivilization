@@ -12,9 +12,10 @@ def draw_board(game):
     state = game.GameState
     board = state.board
     r = game.Renderer
-    origin = r.origin
+    screen = r.screen
     cam = r.camera
-    size = cam.hex_size
+    display = r.camera.surface
+    display.fill((0, 0, 0))
     w = r.width
     h = r.height
 
@@ -30,17 +31,21 @@ def draw_board(game):
             q, r = doubled_to_axial(row, col)
             tile = board.get(f"{q},{r}")
             if tile:
-                tile.draw_tile_images(game)
+                tile.draw_tile_images_to_display(game)
                 # tile.draw_outline(game)
-                # tile.draw_coords(game, ctype="doubled")
+                #tile.draw_coords(game, ctype="both")
         subtr = 1 if subtr == 0 else 0
+
+
+    display = pg.transform.scale(display, (w, h))
+    screen.blit(display, (0, 0))
 
 
 def diagnosticsDraw(game):
     render = game.Renderer
     w = render.width
     h = render.height
-    display = render.display
+    screen = render.screen
     largeText = render.largeText
 
     dt_string = "dt: " + format(1000 * game.dt, "4.0f") + "ms"
@@ -55,8 +60,8 @@ def diagnosticsDraw(game):
     TextSurf = largeText.render(fps_string, False, (255, 255, 255))
     text_rect = TextSurf.get_rect(center=(12 * w // 17, 30))
 
-    pg.draw.rect(display, (0, 0, 0), text_rect_mock)
-    display.blit(TextSurf, text_rect)
+    pg.draw.rect(screen, (0, 0, 0), text_rect_mock)
+    screen.blit(TextSurf, text_rect)
 
     TextSurfMock = largeText.render(dt_mock, False, (255, 255, 255))
     text_rect_mock = TextSurfMock.get_rect(center=(9 * w // 10, 30))
@@ -64,11 +69,11 @@ def diagnosticsDraw(game):
     TextSurf = largeText.render(dt_string, False, (255, 255, 255))
     text_rect = TextSurf.get_rect(center=(9 * w // 10, 30))
 
-    pg.draw.rect(display, (0, 0, 0), text_rect_mock)
-    display.blit(TextSurf, text_rect)
+    pg.draw.rect(screen, (0, 0, 0), text_rect_mock)
+    screen.blit(TextSurf, text_rect)
 
-    pg.draw.line(display, (0, 0, 255), (w // 2, 0), (w // 2, h))
-    pg.draw.line(display, (0, 0, 255), (0, h // 2), (w, h // 2))
+    pg.draw.line(screen, (0, 0, 255), (w // 2, 0), (w // 2, h))
+    pg.draw.line(screen, (0, 0, 255), (0, h // 2), (w, h // 2))
 
     pg.display.update()
 
@@ -76,20 +81,21 @@ def diagnosticsDraw(game):
 def cleanDiagnosticDraw(game):
     if game.cleanDiagnostic:
         # print("clean")
-        display = game.Renderer.display
-        display.fill(game.Renderer.defaultColor)
-        draw_board(game)
+        screen = game.Renderer.screen
+        screen.fill(game.Renderer.defaultColor)
+        if game.GameState.start_game:
+            draw_board(game)
         game.cleanDiagnostic = False
         pg.display.update()
 
 
 def draw(game):
     r = game.Renderer
-    display = r.display
+    screen = r.screen
 
     if r.full_redraw:
         r.full_redraw = False
-        display.fill((200, 200, 200))
+        screen.fill((200, 200, 200))
         draw_board(game)
         pg.display.update()
 
@@ -100,16 +106,15 @@ def drawSettingsMenu(game):
     pass
 
 
-
 def drawMenu(game):
     r = game.Renderer
-    display = r.display
-    display.fill((0, 0, 0))
+    screen = r.screen
+    screen.fill((0, 0, 0))
     boxes = r.mainMenuBoxes
     for box_info in boxes:
         surf, rect = box_info
-        pg.draw.rect(display, (0, 0, 0), rect)
-        display.blit(surf, rect)
+        pg.draw.rect(screen, (0, 0, 0), rect)
+        screen.blit(surf, rect)
 
     pg.display.update()
     diagnosticsDraw(game) if game.drawDiagnostic else cleanDiagnosticDraw(game)
@@ -117,12 +122,12 @@ def drawMenu(game):
 
 def drawMapSelect(game, timer):
     r = game.Renderer
-    display = r.display
-    display.fill((0, 0, 0))
+    screen = r.screen
+    screen.fill((0, 0, 0))
     rects = r.mapSelectBoxes
     for rect in rects:
         c = (100, 100, 100)
-        pg.draw.rect(display, c, rect)
+        pg.draw.rect(screen, c, rect)
 
     drawEffect = MAP_TO_DISPLAY["random"]
     drawEffect(game, rects[0], c, timer)

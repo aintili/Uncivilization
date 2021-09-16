@@ -114,7 +114,7 @@ def basicUserInputLogic(game):
     inputs = game.PlayerInput
     mc_pos = inputs.mc_pos
     cam = rend.camera
-    size = cam.hex_size
+    scale_factor = 1 / cam.screen_to_display_ratio
 
     # if mc_pos:
     #     v = screen_pixel_to_axial(game, mc_pos)
@@ -122,23 +122,25 @@ def basicUserInputLogic(game):
     #     q, r = v
     #     print(f"{q},{r} | {col},{row}\n")
 
+    if inputs.scrolling:
+        cam.zoom_recenter_method3(game)
+        inputs.scrolling = False
+        rend.full_redraw = True
+
     if inputs.lc_held1 is not None and inputs.lc_held0 is not None:
         x0, y0 = inputs.lc_held0
         x1, y1 = inputs.lc_held1
 
         diffx = x1 - x0
         diffy = y1 - y0
-        diff = (-diffx, -diffy)
+        diff = (-scale_factor * diffx, -scale_factor * diffy)
+        # diff = (-diffx/scale_factor,-diffy/scale_factor)
+
         cam.add_to_center(diff, game)
 
         rend.full_redraw = True
         if inputs.lc_held1 == inputs.lc_held0:
             rend.full_redraw = False
-
-    if inputs.scrolling:
-        cam.zoom_recenter_method2(game)
-        inputs.scrolling = False
-        rend.full_redraw = True
 
 
 def basicUserInputLogic_MainMenu(game):
@@ -188,6 +190,7 @@ def basicUserInputLogic_MapSelectMenu(game):
 
 def basicUserInputUpdateState_SettingsMenu(game):
     pass
+
 
 def basicUserInputLogic_SettingsMenu(game):
     pass

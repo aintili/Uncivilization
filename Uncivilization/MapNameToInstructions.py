@@ -4,38 +4,44 @@ import random
 import time
 
 from Uncivilization.Hex import *
+from Uncivilization.Camera import *
 
 
 def convert_hexes(game):
     t0 = time.time()
-
     r = game.Renderer
-    camera = r.camera
-    mid_size = camera.hex_size
+    h_scr = r.height
+    w_scr = r.width
+    n_max = r.n_max
+    n_min = r.n_min
+    rows,cols = game.GameState.grid_size
+    
+    new_asset_width = np.sqrt(1.5) * h_scr / n_max
+    print(new_asset_width)
+    new_asset_height = 2 * new_asset_width / np.sqrt(3)
 
-    _, twice_hex_size = r.default_hex_asset_size
-    mid_scale = get_bordered_hex_scale(
-        game, twice_hex_size, mid_size, hex_buffer=r.default_hex_buff
+    scale = (int(new_asset_width),int(new_asset_height))
+
+    items = r.assets["base_hexes"].items()
+
+    # r.assets["base_hexes"].update(
+    #     {img_name: img.convert_alpha() for img_name, img in items}
+    # )
+
+    r.assets["base_hexes"].update(
+        {img_name: pg.transform.scale(img.convert_alpha(),scale) for img_name, img in items}
     )
 
-    r.assets = {
-        img_name: pg.transform.scale(img.convert_alpha(), mid_scale)
-        for img_name, img in r.assets.items()
-    }
-
-    img = r.assets[list(r.assets.keys())[0]]
-    _, img_h = img.get_size()
-
-    r.current_hex_buff = (img_h - 2 * mid_size) / 2
+    game.Renderer.camera = Camera(scale, w_scr, h_scr, rows, cols, n_max=14, n_min=4)
 
     dt = time.time() - t0
     dt = format(1000 * dt, "0.2f")
 
-    print(f"Finished processing {len(r.assets.keys())} assets in {dt}ms")
+    print(f"Finished processing {len(items)} assets in {dt}ms")
 
 
 def get_random_dots_info(game, rect, rect_color, background_color, text_rect):
-    display = game.Renderer.display
+    screen = game.Renderer.screen
 
     x0, y0 = rect.topleft
     x1, y1 = rect.bottomright
@@ -43,8 +49,8 @@ def get_random_dots_info(game, rect, rect_color, background_color, text_rect):
     buffx = (x1 - x0) / 10
     buffy = (y1 - y0) / 10
 
-    pg.draw.rect(display, background_color, rect)
-    pg.draw.rect(display, rect_color, rect)
+    pg.draw.rect(screen, background_color, rect)
+    pg.draw.rect(screen, rect_color, rect)
 
     dots_to_draw = np.random.randint(20, 30)
     r = min(buffx, buffy) // 2
@@ -72,7 +78,7 @@ def get_random_dots_info(game, rect, rect_color, background_color, text_rect):
 
 def draw_random_dots(game, rect, rect_color, timer, background_color=(0, 0, 0)):
     rend = game.Renderer
-    display = rend.display
+    screen = rend.screen
 
     title_string = "Random"
     largeText = rend.largeText
@@ -94,9 +100,9 @@ def draw_random_dots(game, rect, rect_color, timer, background_color=(0, 0, 0)):
     to_draw = rend.mapSelectRedraw
     for draw_info in to_draw:
         rx, ry, color, r = draw_info
-        pg.draw.circle(display, color, (rx, ry), r)
+        pg.draw.circle(screen, color, (rx, ry), r)
 
-    display.blit(TextSurf, text_rect)
+    screen.blit(TextSurf, text_rect)
 
 
 def random_tiles(game):
@@ -126,6 +132,7 @@ def random_tiles(game):
             tile = Hex(cube=cube, images=[img])
             q, r = tile.v
             state.board.update({f"{q},{r}": tile})
+        
 
 
 MAP_TO_FUNC = {"random": random_tiles}
