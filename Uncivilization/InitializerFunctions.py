@@ -76,9 +76,6 @@ def initialize_game_object(raw_assets, sounds, player_config):
 
     # initialize Game object
     Game_State = GameState()
-    hex_asset_size = raw_assets["base_hexes"]["red_hex_and_border.png"].get_size()
-    rows, cols = Game_State.grid_size
-    #camera = Camera(hex_asset_size, width, height, rows, cols)
     Player_Input = PlayerInput()
     Game_Renderer = Renderer(screen, raw_assets)
     Audio_Mixer = AudioMixer(sounds)
@@ -106,6 +103,7 @@ def menuSelector(game, clock):
 def start_game(game, clock):
     t0 = time.time()
     init_board(game)
+    init_world_render(game)
     s = True
     while s:
         # Frame rate no higher than FPS
@@ -170,5 +168,6 @@ def mainMenu(game, clock):
 
 
 def init_board(game):
+    convert_hexes_and_set_camera(game)
     f = MAP_TO_FUNC[game.GameState.map_type]
     f(game)

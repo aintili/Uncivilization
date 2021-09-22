@@ -7,37 +7,35 @@ from Uncivilization.Hex import *
 from Uncivilization.Camera import *
 
 
-def convert_hexes(game):
+def convert_alphas(r):
     t0 = time.time()
-    r = game.Renderer
-    h_scr = r.height
-    w_scr = r.width
-    n_max = r.n_max
-    n_min = r.n_min
-    rows,cols = game.GameState.grid_size
-    
-    new_asset_width = np.sqrt(1.5) * h_scr / n_max
-    print(new_asset_width)
-    new_asset_height = 2 * new_asset_width / np.sqrt(3)
-
-    scale = (int(new_asset_width),int(new_asset_height))
-
     items = r.assets["base_hexes"].items()
 
-    # r.assets["base_hexes"].update(
-    #     {img_name: img.convert_alpha() for img_name, img in items}
-    # )
-
     r.assets["base_hexes"].update(
-        {img_name: pg.transform.scale(img.convert_alpha(),scale) for img_name, img in items}
+        {img_name: img.convert_alpha() for img_name, img in items}
     )
-
-    game.Renderer.camera = Camera(scale, w_scr, h_scr, rows, cols, n_max=14, n_min=4)
-
+    
     dt = time.time() - t0
     dt = format(1000 * dt, "0.2f")
+    print(f"Finished converting {len(items)} assets in {dt}ms")
+    return r.assets["base_hex_size"]
 
-    print(f"Finished processing {len(items)} assets in {dt}ms")
+
+def convert_hexes_and_set_camera(game):
+    t0 = time.time()
+    r = game.Renderer
+    rows,cols = game.GameState.grid_size
+    
+    convert_alphas(r)
+    
+    hex_asset_size = r.assets["base_hex_size"]
+    game.Renderer.camera = Camera(hex_asset_size, r.width, r.height, rows, cols, n_max=14, n_min=4)
+
+    dt = time.time() - t0
+    dt = format(1000*dt, "0.2f")
+    print(f"Finished Setting Camera surfaces in {dt}ms")
+
+
 
 
 def get_random_dots_info(game, rect, rect_color, background_color, text_rect):
@@ -106,8 +104,6 @@ def draw_random_dots(game, rect, rect_color, timer, background_color=(0, 0, 0)):
 
 
 def random_tiles(game):
-    convert_hexes(game)
-
     state = game.GameState
     grid = state.grid_size
     rows, cols = grid
@@ -122,17 +118,39 @@ def random_tiles(game):
         "white",
     ]
 
+
     # up grid_height//2 and down grid_height // 2
     # same, left and right
-    for row in range(-rows // 2, rows // 2 + 1):
-        for col in range(-cols, cols + 1, 2):
+    r_0 = -(rows // 2)
+    for r in range(rows):
+        row = r_0 + r
+        col_0 = -cols + 1 if row % 2 == 0 else -cols
+        for c in range(cols):
+            col = col_0 + 2*c
             cube = doubled_to_cube(row, col)
             img = random.choice(imgs)
             img = f"{img}_hex_and_border.png"
             tile = Hex(cube=cube, images=[img])
+            #tile = Hex(cube=cube, images=["red_hex_and_border.png"])
             q, r = tile.v
+
             state.board.update({f"{q},{r}": tile})
-        
+
+    # actual_rows = rows + 1 if rows % 2 == 0 else rows
+    # row_extrema_num = rows//2
+    # for row in range(-row_extrema_num,row_extrema_num + 1):
+    #     for col in range(-cols, cols + 1, 2):
+    #         cube = doubled_to_cube(row, col)
+    #         col_corrected,row_corrected = cube_to_doubled(cube)
+    #         # ^ doubled coord weirdness
+    #         if abs(col_corrected) <= cols:
+    #             #img = random.choice(imgs)
+    #             #img = f"{img}_hex_and_border.png"
+    #             #tile = Hex(cube=cube, images=[img])
+    #             tile = Hex(cube=cube, images=["red_hex_and_border.png"])
+    #             q, r = tile.v
+
+    #             state.board.update({f"{q},{r}": tile})
 
 
 MAP_TO_FUNC = {"random": random_tiles}

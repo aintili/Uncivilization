@@ -174,13 +174,12 @@ class Hex:
     def draw_coords(self, game, ctype="axial"):
         q, r = self.v
         render = game.Renderer
-        origin = render.origin
         cam = render.camera
-        display = cam.surface
-        size = cam.hex_asset_size[1] / 2
+        origin = cam.AXIAL_ORIGIN
 
-        x, y = axial_to_display_pixel(game, self.v)
-
+        x, y = axial_to_pixel(game, self.v)
+        x = x + origin[0]
+        y = y + origin[1]
         coord_s = ""
         if ctype == "axial" or ctype == "both":
             coord_s += "{q} , {r}".format(q=int(q), r=int(r))
@@ -195,15 +194,14 @@ class Hex:
 
         TextSurf = render.coordText.render(coord_s, False, (1, 1, 1))
         text_rect = TextSurf.get_rect(center=(x, y))
-        display.blit(TextSurf, text_rect)
+        cam.WORLD_SURFACE.blit(TextSurf,text_rect)
 
-    def get_image(self, game, img="dark_blue_hex_and_border.png"):
+    def get_image_for_display(self, game, img="dark_blue_hex_and_border.png"):
         r = game.Renderer
         assets = r.assets["base_hexes"]
 
         loaded_image = assets[img]
         img_w, img_h = loaded_image.get_size()
-        #print(img_w,img_h)
         x0, y0 = axial_to_display_pixel(game, self.v)
         dest = (x0 - img_w / 2, y0 - img_h / 2)
 
@@ -214,5 +212,30 @@ class Hex:
         camera = rend.camera
         display = camera.surface
         for image in self.images:
-            asset, dest = self.get_image(game, img=image)
+            asset, dest = self.get_image_for_display(game, img=image)
             display.blit(asset, dest)
+
+
+    def get_image_for_world(self, game, img="dark_blue_hex_and_border.png"):
+        r = game.Renderer
+        assets = r.assets["base_hexes"]
+        cam = r.camera
+        
+        origin = cam.AXIAL_ORIGIN
+
+        loaded_image = assets[img]
+        img_w, img_h = loaded_image.get_size()
+        x0, y0 = axial_to_pixel(game, self.v)
+
+        x_new = x0 + origin[0] - (img_w / 2)
+        y_new = y0 + origin[1] - (img_h / 2)
+
+        return loaded_image, (x_new,y_new)
+
+
+    def draw_tile_images_to_world(self, game):
+        rend = game.Renderer
+        camera = rend.camera
+        for image in self.images:
+            asset, dest = self.get_image_for_world(game, img=image)
+            camera.WORLD_SURFACE.blit(asset, dest)

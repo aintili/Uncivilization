@@ -28,25 +28,18 @@ class Camera:
         self.reverse = False
         self.zoom_level = 1
 
-        ###### doubled coords #######
-        max_row = rows // 2
-        min_row = abs(-rows // 2)
+        size = self.hex_asset_size[1] / 2 
+        rows_bot = -(-rows//2) if rows % 2 == 0 else -(-rows//2) - 1
+        rows_top = rows // 2 if rows % 2 == 1 else (rows // 2) - 1
+
+        self.d_from_top = size * (1.5 * rows_top + 1)
+        self.d_from_bottom = size * (1.5 * rows_bot + 1)
+        w_world = (cols + 0.5) * self.hex_asset_size[0]
+        h_world = self.d_from_top + self.d_from_bottom
         
-        self.pos_x = 0.5 * (cols + 1) * self.hex_asset_size[0]
-        self.neg_x = -0.5 * (cols + 2)* self.hex_asset_size[0]
-
-        self.pos_y = self.get_row_boundary(max_row)
-        self.neg_y = -self.get_row_boundary(min_row)
-
-        print(self.pos_x - self.neg_x)
-        print(self.pos_y - self.neg_y)
-        #############################
-
-    def get_row_boundary(self, row):
-        r = row // 2
-        r *= 3
-        r += 1 if row % 2 == 0 else 2.5
-        return self.hex_size * r
+        self.world_size = (w_world,h_world)
+        self.WORLD_SURFACE = pg.Surface(self.world_size)
+        self.AXIAL_ORIGIN = None
 
 
     def get_surface_center(self):
@@ -85,34 +78,48 @@ class Camera:
     def update_center(self, cen, game):
         gs = game.GameState
         board = gs.board
+
         cx, cy = cen
         row, col = game.GameState.grid_size
+
         w, h = self.surface.get_size()
+        world_size = self.world_size
+        origin = self.AXIAL_ORIGIN
 
-        pos_x = self.pos_x
-        pos_y = self.pos_y
-
-        neg_x = self.neg_x
-        neg_y = self.neg_y
+        max_x = world_size[0]
+        min_x = 0
+        max_y = world_size[1]
+        min_y = 0
 
         br, tl = self.get_bottom_right_and_top_left(center=cen)
 
+        br_worldx = br[0] + origin[0]
+        br_worldy = br[1] + origin[1]
+
+        tl_worldx = tl[0] + origin[0]
+        tl_worldy = tl[1] + origin[1]
+
+        cx_worldx = cx + origin[0]
+        cy_worldy = cy + origin[1]
+
         # # Overshot right
-        if br[0] > pos_x:
-            cx = pos_x - w / 2
+        if br_worldx > max_x:
+            cx_worldx = max_x - w / 2
 
         # # Overshot left
-        if tl[0] < neg_x:
-            cx = neg_x + w / 2
+        if tl_worldx < min_x:
+            cx_worldx = min_x + w / 2
 
         # # Overshot up
-        if tl[1] < neg_y:
-            cy = neg_y + h / 2
+        if tl_worldy < min_y:
+            cy_worldy = min_y + h / 2
 
         # # Overshot down
-        if br[1] > pos_y:
-            cy = pos_y - h / 2
+        if br_worldy > max_y:
+            cy_worldy = max_y - h / 2
 
+        cx = cx_worldx - origin[0]
+        cy = cy_worldy - origin[1]
         self.center = (cx, cy)
 
 
@@ -122,55 +129,23 @@ class Camera:
         new_center = (x1 + x0, y1 + y0)
         self.update_center(new_center, game)
 
-    def zoom_recenter_method2(self, game):
-        inputs = game.PlayerInput
 
-        # through a bit of geometry one can show:
-        # Let D1 be the length of the segment from
-        # the center of a hex the camera center is on
-        # and the center of the camera. If that line continued,
-        # Let D2 be the length of the segment from the center of the camera
-        # to where-ever that line intersects the hexagon.
-        # Then:
-        # D1/(D1+D2) = 2Y/(sqrt(3) * size)
-        # Where Y is y_camera - y_hex_origin
-        # To correctly place the camera after zoom we assert
-        # the ratio D1/(D1+D2) is unchanged. That is, Y_new = (size_new/size_old)*Y_old
-        # Since the new right triangle is a shear transformation of the old right triangle,
-        # they are similar, so the ratio X/Y must also be preserved,
-        # thus:
-        # X_new = (size_new/size_old)*X_old
-        # Since this is done entirely through ratios, this works
-        # independently of which sub equilateral triangle we are in
-
-        v = pixel_to_axial(game, self.center)
-
-        x0_old, y0_old = axial_to_pixel(game, v)
-        xc, yc = self.center
-
-        Y_old = yc - y0_old
-        X_old = xc - x0_old
-        size_old = self.apparent_hex_size
-        H_old = 0.5 * S3 * size_old  # height of equilateral triangle
-        R = Y_old / H_old
-
-        scroll_sp = 0.5
-        scroll_amt = inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
-        self.update_apparent_hex_size(scroll_amt, game)
-
-        x0_new, y0_new = axial_to_pixel(game, v)
-
-        Y_new = (self.apparent_hex_size / size_old) * Y_old
-        yc_new = Y_new + y0_new
-
-        X_new = (self.apparent_hex_size / size_old) * X_old
-        xc_new = X_new + x0_new
-
-        self.update_center((xc_new, yc_new), game)
-
-    def zoom_recenter_method3(self, game):
+    def zoom_and_recenter(self, game):
         inputs = game.PlayerInput
         scroll_sp = 0.3
         scroll_amt = -1 * inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
         self.zoom(scroll_amt, game)
-        self.update_center(self.center, game)
+        self.update_center(self.center, game) # probably not necessary
+
+    def update_display_as_world_section(self):
+        origin = self.AXIAL_ORIGIN
+        world = self.WORLD_SURFACE
+
+        _, tl = self.get_bottom_right_and_top_left()
+        tlx,tly = tl
+        tlx += origin[0]
+        tly += origin[1]
+
+        proper_rect = pg.Rect((tlx,tly),self.surface.get_size())
+        new_surface = world.subsurface(proper_rect)
+        self.surface = new_surface

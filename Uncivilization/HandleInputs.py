@@ -116,14 +116,14 @@ def basicUserInputLogic(game):
     cam = rend.camera
     scale_factor = 1 / cam.screen_to_display_ratio
 
-    # if mc_pos:
-    #     v = screen_pixel_to_axial(game, mc_pos)
-    #     col, row = axial_to_doubled(v)
-    #     q, r = v
-    #     print(f"{q},{r} | {col},{row}\n")
+    if mc_pos:
+        v = screen_pixel_to_axial(game, mc_pos)
+        col, row = axial_to_doubled(v)
+        q, r = v
+        print(f"{q},{r} | {col},{row}\n")
 
     if inputs.scrolling:
-        cam.zoom_recenter_method3(game)
+        cam.zoom_and_recenter(game)
         inputs.scrolling = False
         rend.full_redraw = True
 

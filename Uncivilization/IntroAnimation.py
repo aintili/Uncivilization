@@ -50,7 +50,7 @@ def execute_animation(game, clock):
                     screen.fill((0, 0, 0))
                     center_y = h // 2
                     audio_mixer.stop_all()
-                    doom.play()
+                    #doom.play()
                     gamestate.skip_animation = True
 
             elif event.type == pg.MOUSEBUTTONDOWN:
@@ -58,7 +58,7 @@ def execute_animation(game, clock):
                     screen.fill((0, 0, 0))
                     center_y = h // 2
                     audio_mixer.stop_all()
-                    doom.play()
+                    #doom.play()
                     gamestate.skip_animation = True
 
         if gamestate.skip_animation:
@@ -110,7 +110,7 @@ def execute_animation(game, clock):
 
         # Doom as soon as we update
         pg.display.update()
-        doom.play()
+        #doom.play()
 
     else:
         pg.display.update()

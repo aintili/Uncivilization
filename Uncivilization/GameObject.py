@@ -46,7 +46,7 @@ class PlayerInput:
 class GameState:
     def __init__(self):
         self.isPaused = False
-        self.rows = 20
+        self.rows = 25
         self.cols = 50
         self.grid_size = (self.rows, self.cols)
         self.board = {}
@@ -98,9 +98,6 @@ class Renderer:
         self.to_update = []
         self.camera = None
         self.full_redraw = True
-        self.default_hex_buff = 5
-        self.current_hex_buff = None
-        self.default_hex_asset_size = (238, 274)
         self.mainMenuBoxes = self.getMainMenuBoxes()
         self.mapSelectBoxes = self.getMapSelectBoxes()
         self.mapSelectRedraw = None
