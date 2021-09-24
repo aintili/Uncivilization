@@ -28,19 +28,18 @@ class Camera:
         self.reverse = False
         self.zoom_level = 1
 
-        size = self.hex_asset_size[1] / 2 
-        rows_bot = -(-rows//2) if rows % 2 == 0 else -(-rows//2) - 1
+        size = self.hex_asset_size[1] / 2
+        rows_bot = -(-rows // 2) if rows % 2 == 0 else -(-rows // 2) - 1
         rows_top = rows // 2 if rows % 2 == 1 else (rows // 2) - 1
 
         self.d_from_top = size * (1.5 * rows_top + 1)
         self.d_from_bottom = size * (1.5 * rows_bot + 1)
         w_world = (cols + 0.5) * self.hex_asset_size[0]
         h_world = self.d_from_top + self.d_from_bottom
-        
-        self.world_size = (w_world,h_world)
+
+        self.world_size = (w_world, h_world)
         self.WORLD_SURFACE = pg.Surface(self.world_size)
         self.AXIAL_ORIGIN = None
-
 
     def get_surface_center(self):
         w, h = self.surface.get_size()
@@ -122,30 +121,28 @@ class Camera:
         cy = cy_worldy - origin[1]
         self.center = (cx, cy)
 
-
     def add_to_center(self, incr, game):
         x1, y1 = incr
         x0, y0 = self.center
         new_center = (x1 + x0, y1 + y0)
         self.update_center(new_center, game)
 
-
     def zoom_and_recenter(self, game):
         inputs = game.PlayerInput
         scroll_sp = 0.3
         scroll_amt = -1 * inputs.scroll_dir * game.dt * game.TARGET_FPS * scroll_sp
         self.zoom(scroll_amt, game)
-        self.update_center(self.center, game) # probably not necessary
+        self.update_center(self.center, game)  # probably not necessary
 
     def update_display_as_world_section(self):
         origin = self.AXIAL_ORIGIN
         world = self.WORLD_SURFACE
 
         _, tl = self.get_bottom_right_and_top_left()
-        tlx,tly = tl
+        tlx, tly = tl
         tlx += origin[0]
         tly += origin[1]
 
-        proper_rect = pg.Rect((tlx,tly),self.surface.get_size())
+        proper_rect = pg.Rect((tlx, tly), self.surface.get_size())
         new_surface = world.subsurface(proper_rect)
         self.surface = new_surface

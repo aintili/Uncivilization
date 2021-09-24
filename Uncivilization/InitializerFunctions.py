@@ -143,9 +143,21 @@ def mapSelect(game, clock):
         game.AudioMixer.fadeout_all()
 
 
+def convert_menu_assets(game):
+    t0 = time.time()
+    assets = game.Renderer.assets["initial_screen"]
+    assets = {key: img.convert() for key, img in assets.items()}
+    game.Renderer.assets["initial_screen"] = assets
+
+    dt = time.time() - t0
+    dt = format(1000 * dt, "0.2f")
+
+    print(f"Finished Processing {len(assets.items())} 'screen' assets in {dt}ms")
+
+
 def mainMenu(game, clock):
     gamestate = game.GameState
-
+    convert_menu_assets(game)
     play_animation(game, clock)
 
     # t0
@@ -157,14 +169,15 @@ def mainMenu(game, clock):
         t0 = t1
         game.dt = dt
         updateInputs(game)
-        if gamestate.inMainMenu:
-            # standard game loop, poll inputs, process and update game state, render
-            updateStateMenu(game)
-            drawMenu(game)
 
         if gamestate.inSettingsMenu:
             updateStateSettingsMenu(game)
             drawSettingsMenu(game)
+
+        elif gamestate.inMainMenu:
+            # standard game loop, poll inputs, process and update game state, render
+            updateStateMenu(game)
+            drawMenu(game)
 
 
 def init_board(game):

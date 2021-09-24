@@ -194,7 +194,7 @@ class Hex:
 
         TextSurf = render.coordText.render(coord_s, False, (1, 1, 1))
         text_rect = TextSurf.get_rect(center=(x, y))
-        cam.WORLD_SURFACE.blit(TextSurf,text_rect)
+        cam.WORLD_SURFACE.blit(TextSurf, text_rect)
 
     def get_image_for_display(self, game, img="dark_blue_hex_and_border.png"):
         r = game.Renderer
@@ -215,12 +215,11 @@ class Hex:
             asset, dest = self.get_image_for_display(game, img=image)
             display.blit(asset, dest)
 
-
     def get_image_for_world(self, game, img="dark_blue_hex_and_border.png"):
         r = game.Renderer
         assets = r.assets["base_hexes"]
         cam = r.camera
-        
+
         origin = cam.AXIAL_ORIGIN
 
         loaded_image = assets[img]
@@ -230,8 +229,7 @@ class Hex:
         x_new = x0 + origin[0] - (img_w / 2)
         y_new = y0 + origin[1] - (img_h / 2)
 
-        return loaded_image, (x_new,y_new)
-
+        return loaded_image, (x_new, y_new)
 
     def draw_tile_images_to_world(self, game):
         rend = game.Renderer

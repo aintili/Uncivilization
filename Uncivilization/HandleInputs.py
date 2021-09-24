@@ -159,6 +159,10 @@ def basicUserInputLogic_MainMenu(game):
             gs.inMainMenu = False
             gs.inMapSelect = True
 
+        elif rect_settings.collidepoint(mc_pos):
+            # We have hit setting
+            gs.inSettingsMenu = True
+
     if m_pos is not None:
         if rect_play.collidepoint(m_pos):
             rend.updateMainMenuBoxes(background_color_1=(50, 50, 50))
@@ -189,8 +193,37 @@ def basicUserInputLogic_MapSelectMenu(game):
 
 
 def basicUserInputUpdateState_SettingsMenu(game):
-    pass
+    r = game.Renderer
+    inputs = game.PlayerInput
+    gamestate = game.GameState
+    events = inputs.events
+    for event in events:
+        if event.type == pg.QUIT:
+            quit()
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                m_pos = pg.mouse.get_pos()
+                inputs.mc_pos = m_pos
+            if event.button == 3:
+                if game.drawDiagnostic:
+                    game.cleanDiagnostic = True
+                game.drawDiagnostic = not game.drawDiagnostic
+        elif event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                gamestate.inSettingsMenu = False
+                gamestate.skip_animation = True
+
+        elif event.type == pg.VIDEORESIZE:
+            r.width = event.w
+            r.height = event.h
 
 
 def basicUserInputLogic_SettingsMenu(game):
-    pass
+    rend = game.Renderer
+    gs = game.GameState
+    inputs = game.PlayerInput
+    mc_pos = inputs.mc_pos
+    m_pos = inputs.m_pos
+    boxes = rend.settingsMenuBoxes
+
+    rend.updateSettingsMenuBoxes()
